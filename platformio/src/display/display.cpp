@@ -3,6 +3,7 @@
 
 //
 #include "display/ErrorScreen/ErrorScreen.h"
+#include "display/WiFiScreen/WiFiScreen.h"
 #include "display/ClockScreen/ClockScreen.h"
 
 // Invoke library, pins defined in platformio.ini
@@ -52,6 +53,17 @@ void display_loop()
       else
         // loop
         ErrorScreen_render(&tft);
+    }
+
+    // Wifi Check and Setup Screen (Default Screen)
+    else if (screen == WIFISCREEN)
+    {
+      // setup only once
+      if (screen != screen_prev)
+        WiFiScreen_setup(&tft);
+      else
+        // loop
+        WiFiScreen_render(&tft);
     }
 
     // Clock Screen

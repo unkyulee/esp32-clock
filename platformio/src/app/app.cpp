@@ -37,6 +37,12 @@ void app_setup()
         return;
     }
 
+    // Wifi connection check
+    if (wifi_check() == false)
+    {
+        _log("Wifi Connection failed\n");
+    }
+
     // app ready
     _ready = true;
     _log("App is ready\n");

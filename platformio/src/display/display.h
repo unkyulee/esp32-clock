@@ -1,7 +1,8 @@
 #pragma once
 
+#define WIFISCREEN  0 // default screen
 #define ERRORSCREEN 1
-#define CLOCKSCREEN 0 // default screen
+#define CLOCKSCREEN 2
 
 // TFT_eSPI setup
 #include <SPI.h>
