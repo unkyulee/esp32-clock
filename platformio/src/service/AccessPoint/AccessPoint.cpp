@@ -1,5 +1,7 @@
-#include <WiFi.h>
+#include "AccessPoint.h"
 #include "app/app.h"
+
+#include <WiFi.h>
 
 // Starts an Access Point with the name "ESP32 Clock"
 void startAccessPoint()
@@ -15,5 +17,5 @@ void startAccessPoint()
     // Optionally print the IP address
     IPAddress apIP = WiFi.softAPIP();
     _log("Access Point started. IP address: %s\n", apIP.toString().c_str());
-    app["apIP"] = apIP; // save IP information to global
+    app["apIP"] = apIP.toString(); // save IP information to global
 }

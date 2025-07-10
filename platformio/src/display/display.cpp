@@ -35,7 +35,7 @@ void display_setup()
 //
 void display_loop()
 {
-  static unsigned int last = millis();
+  static unsigned int last = 0;
   if (millis() - last > 150)
   {
     last = millis();
