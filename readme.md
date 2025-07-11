@@ -16,16 +16,17 @@ Home Assistant Actions
 | 46    | DC           |
 | 3     | RST          |
 |       |              |
-| 18    | Button 1     |
-| 17    | Button 2     |
-| 16    | Button 3     |
-| 15    | Button 4     |
+| 15    | Button 1     |
+| 16    | Button 2     |
+| 17    | Button 3     |
+| 18    | Button 4     |
 | 1     | Button 5     |
 | 2     | Button 6     |
 | 42    | Button 7     |
 | 41    | Button 8     |
 |       |              |
+| 40    | EC11 Switch  |
 | 45    | EC11 A       |
 | 48    | EC11 B       |
 |       |              |
-| 47    | Buzzer       |
+| 7    | Buzzer       |

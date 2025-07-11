@@ -5,6 +5,7 @@
 #include "display/ErrorScreen/ErrorScreen.h"
 #include "display/WiFiScreen/WiFiScreen.h"
 #include "display/ClockScreen/ClockScreen.h"
+#include "display/TimerScreen/TimerScreen.h"
 
 // Invoke library, pins defined in platformio.ini
 TFT_eSPI tft = TFT_eSPI();
@@ -81,7 +82,38 @@ void display_loop()
         ClockScreen_render(&tft, &u8f);
     }
 
+    // Timer Screen
+    else if (screen == TIMERSCREEN)
+    {
+      // setup only once
+      if (screen != screen_prev)
+        TimerScreen_setup(&tft, &u8f);
+      else
+        // loop
+        TimerScreen_render(&tft, &u8f);
+    }
+
     //
     app["screen_prev"] = screen;
+  }
+}
+
+//
+void display_input(int key)
+{
+  _log("[display_input] %d\n", key);
+
+  //
+  JsonDocument &app = status();
+  int screen = app["screen"].as<int>();
+
+  if (screen == TIMERSCREEN)
+  {
+    TimerScreen_input(key);
+  }
+
+  else if (screen == CLOCKSCREEN)
+  {
+    ClockScreen_input(key);
   }
 }

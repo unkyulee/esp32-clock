@@ -6,9 +6,12 @@
 // display
 #include "display/display.h"
 
+// inputs
+#include "input/Knob/Knob.h"
+#include "input/Buttons/Buttons.h"
+
 //
 void TaskCore1(void *pvParameters);
-
 
 /*----------------------------------------------
 Dual Core: First Core
@@ -23,6 +26,21 @@ void setup()
 
     //
     display_setup();
+
+    //
+    knob_setup();
+    buttons_setup();
+
+    // Start the second core task
+    xTaskCreatePinnedToCore(
+        TaskCore1,   // Function to run
+        "TaskCore1", // Name
+        8192,        // Stack size
+        NULL,        // Parameters
+        1,           // Priority
+        NULL,        // Task handle
+        1            // Core 1
+    );
 }
 
 //
@@ -44,11 +62,18 @@ Such as background tasks.
 //
 void TaskCore1(void *pvParameters)
 {
+    _log("TaskCore1 Started\n");
+
+    //
     while (1)
     {
         //
         app_loop();
-        
+
+        //
+        knob_loop();
+        buttons_loop();
+
         //
         yield();
     }

@@ -3,6 +3,10 @@
 #define WIFISCREEN  0 // default screen
 #define ERRORSCREEN 1
 #define CLOCKSCREEN 2
+#define TIMERSCREEN 3
+
+#define SCREEN_WIDTH 320
+#define SCREEN_HEIGHT 240
 
 // TFT_eSPI setup
 #include <SPI.h>
@@ -15,3 +19,6 @@ void display_loop();
 
 //
 TFT_eSprite& display_sprite();
+
+//
+void display_input(int key);
