@@ -5,6 +5,7 @@
 //
 #include "service/AccessPoint/AccessPoint.h"
 #include "service/ConfigServer/ConfigServer.h"
+#include "service/Time/Time.h"
 
 //
 #include <WiFi.h>
@@ -47,6 +48,9 @@ void WiFiScreen_render(TFT_eSPI *ptft)
         
         // start configuration web server
         startWebServer();
+
+        // update time
+        updateTime();
 
         // Move to Clock Screen
         app["screen"] = CLOCKSCREEN;

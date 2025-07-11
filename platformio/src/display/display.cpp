@@ -9,6 +9,7 @@
 // Invoke library, pins defined in platformio.ini
 TFT_eSPI tft = TFT_eSPI();
 TFT_eSprite sprite(&tft);
+U8g2_for_TFT_eSPI u8f; // U8g2 font instance
 
 //
 TFT_eSprite &display_sprite()
@@ -24,8 +25,11 @@ void display_setup()
   // Initialise the TFT screen
   tft.begin();
 
+  // connect u8g2 procedures to TFT_eSPI
+  u8f.begin(tft);
+
   //
-  tft.setRotation(3);
+  tft.setRotation(1);
 
   // Fill screen with grey so we can see the effect of printing with and without
   // a background colour defined
@@ -71,10 +75,10 @@ void display_loop()
     {
       // setup only once
       if (screen != screen_prev)
-        ClockScreen_setup(&tft);
+        ClockScreen_setup(&tft, &u8f);
       else
         // loop
-        ClockScreen_render(&tft);
+        ClockScreen_render(&tft, &u8f);
     }
 
     //
