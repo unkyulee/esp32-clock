@@ -28,6 +28,9 @@ bool config_load()
             configString = "{}";
         }
 
+        //
+        _debug(configString.c_str());
+
         // Prepare a JsonDocument for the configuration
         // The size should be adjusted according to your configuration's needs
         JsonDocument configDoc;

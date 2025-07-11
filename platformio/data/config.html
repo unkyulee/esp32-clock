@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>WiFi Setup</title>
+  <title>#name#</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
@@ -68,15 +68,19 @@
   </style>
 </head>
 <body>
-  <form class="container" method="POST" action="/wifi">
-    <h2>WiFi Setup</h2>
+  <form class="container" method="POST" action="/save">
+    <h2>#name# Setup</h2>
+    
+    <label for="ssid">Device Name</label>
+    <input type="text" id="name" name="name" value="#name#" required>
+    
     <label for="ssid">WiFi SSID</label>
-    <input type="text" id="ssid" name="ssid" required autocomplete="username">
+    <input type="text" id="ssid" name="ssid" value="#ssid#" required>
 
     <label for="password">WiFi Password</label>
-    <input type="password" id="password" name="password" required autocomplete="current-password">
+    <input type="password" id="password" name="password" value="#password#" required>
 
-    <button type="submit">Connect</button>
+    <button type="submit">Save</button>
   </form>
 </body>
 </html>

@@ -1,5 +1,6 @@
 #include "WiFiScreen.h"
 #include "app/app.h"
+#include "display/display.h"
 
 //
 #include "service/AccessPoint/AccessPoint.h"
@@ -42,9 +43,13 @@ void WiFiScreen_render(TFT_eSPI *ptft)
         if (mode != prevMode)
             ptft->fillScreen(TFT_BLACK);
 
-        ptft->print("WiFi connected");
-        // wifi is connected
-        // go ahead and perform the first downloads and display the clock screen
+        ptft->printf("WiFi connected: %s", app["ip"].as<const char *>());
+        
+        // start configuration web server
+        startWebServer();
+
+        // Move to Clock Screen
+        app["screen"] = CLOCKSCREEN;
     }
 
     // Start AP

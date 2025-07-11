@@ -11,6 +11,9 @@ void startAccessPoint()
     const char *ap_ssid = "ESP32 Clock";
     const char *ap_password = nullptr; // Open network, or set a password if desired
 
+    if(app["config"]["name"].is<String>())
+        ap_ssid = app["config"]["name"].as<String>().c_str();
+
     WiFi.mode(WIFI_AP);
     WiFi.softAP(ap_ssid, ap_password);
 

@@ -22,13 +22,25 @@ bool filesystem_check()
 // otherwise the screen will go to AP screen
 bool wifi_check()
 {
+    _log("wifi_check started\n");
+
     //
     JsonDocument &app = status();
 
     // Get SSID and password from app status
-    const char *ssid = app["wifi_ssid"] | "";
-    const char *password = app["wifi_password"] | "";
+    const char *ssid = "";
+    if (app["config"]["ssid"].is<const char*>())
+        ssid = app["config"]["ssid"].as<const char*>();
 
+    const char *password = "";
+    if (app["config"]["password"].is<const char*>())
+        password = app["config"]["password"].as<const char*>();
+
+    //
+    _debug("ssid: %s\n", ssid);
+    _debug("password: %s\n", password);    
+
+    //
     if (strlen(ssid) == 0)
     {
         app["wifi"] = false;
@@ -51,7 +63,13 @@ bool wifi_check()
 
     if (WiFi.status() == WL_CONNECTED)
     {
+        //
         app["wifi"] = true;
+
+        // IP Address
+        app["ip"] = WiFi.localIP().toString().c_str();
+        _log("[wifi_check] %s\n", app["ip"].as<const char*>());
+
         return true;
     }
     else
