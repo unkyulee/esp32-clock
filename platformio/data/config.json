@@ -2,13 +2,5 @@
   "ssid": "Familee-IoT",
   "password": "1234567890a",
   "tzServer": "pool.ntp.org",
-  "tz": "CET-1CEST,M3.5.0/2,M10.5.0/3",
-  "button_1": 127,
-  "button_2": 128,
-  "button_3": 129,
-  "button_4": 183,
-  "button_5": 205,
-  "button_6": 183,
-  "button_7": 233,
-  "button_8": 234
+  "tz": "CET-1CEST,M3.5.0/2,M10.5.0/3"
 }

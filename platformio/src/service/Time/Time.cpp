@@ -13,13 +13,13 @@ void updateTime()
     // → CET = UTC+1 (standard time)
     // → CEST = UTC+2 (daylight saving time)
     // → DST starts last Sunday in March at 2:00, ends last Sunday in October at 3:00
-    const char *tz = "CET-1CEST,M3.5.0/2,M10.5.0/3";
-    if(app["config"]["tz"].is<const char*>()) tz = app["config"]["tz"].as<const char*>();
+    String tz = "CET-1CEST,M3.5.0/2,M10.5.0/3";
+    if(app["config"]["tz"].is<String>()) tz = app["config"]["tz"].as<String>();
     
     //
-    const char *tzServer = "pool.ntp.org";
-    if(app["config"]["tzServer"].is<const char*>()) tzServer = app["config"]["tzServer"].as<const char*>();
-    configTzTime(tz, tzServer);
+    String tzServer = "pool.ntp.org";
+    if(app["config"]["tzServer"].is<String>()) tzServer = app["config"]["tzServer"].as<String>();
+    configTzTime(tz.c_str(), tzServer.c_str());
 
     struct tm timeinfo;
     while (!getLocalTime(&timeinfo))
