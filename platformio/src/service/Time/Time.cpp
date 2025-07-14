@@ -17,7 +17,9 @@ void updateTime()
     if(app["config"]["tz"].is<const char*>()) tz = app["config"]["tz"].as<const char*>();
     
     //
-    configTzTime(tz, "pool.ntp.org");
+    const char *tzServer = "pool.ntp.org";
+    if(app["config"]["tzServer"].is<const char*>()) tzServer = app["config"]["tzServer"].as<const char*>();
+    configTzTime(tz, tzServer);
 
     struct tm timeinfo;
     while (!getLocalTime(&timeinfo))

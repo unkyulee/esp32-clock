@@ -8,15 +8,18 @@ String prevTime = "";
 //
 void ClockScreen_setup(TFT_eSPI *ptft, U8g2_for_TFT_eSPI *pu8f)
 {
-    ptft->fillScreen(TFT_BLACK);
     _log("Clock Screen Setup\n");
 
+    //
+    ptft->fillScreen(TFT_BLACK);
+
+    //
     prevTime = "";
 }
 
 //
 void ClockScreen_render(TFT_eSPI *ptft, U8g2_for_TFT_eSPI *pu8f)
-{ 
+{
     // retrieve time
     struct tm timeinfo;
     if (getLocalTime(&timeinfo))
@@ -73,8 +76,6 @@ void ClockScreen_render(TFT_eSPI *ptft, U8g2_for_TFT_eSPI *pu8f)
     }
 }
 
-
-
 //
 void ClockScreen_input(int key)
 {
@@ -84,5 +85,5 @@ void ClockScreen_input(int key)
         // move to timer screen when knob is moved
         JsonDocument &app = status();
         app["screen"] = TIMERSCREEN;
-    }   
+    }
 }

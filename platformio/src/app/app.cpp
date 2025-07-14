@@ -4,6 +4,8 @@
 
 #include "app/FileSystem/FileSystemSPIFFS.h"
 
+
+
 // When app is not ready. Such as file system is not initialized
 // then no more operation should occur.
 // this is a flag to check if the app is ready
