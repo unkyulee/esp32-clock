@@ -5,23 +5,10 @@
 
 #include <Button2.h>
 
-#define BUTTON_1 15
-#define BUTTON_2 16
-#define BUTTON_3 17
-#define BUTTON_4 18
-#define BUTTON_5 1
-#define BUTTON_6 2
-#define BUTTON_7 42
-#define BUTTON_8 41
+#define NUM_BUTTONS 8
 
-Button2 button_1;
-Button2 button_2;
-Button2 button_3;
-Button2 button_4;
-Button2 button_5;
-Button2 button_6;
-Button2 button_7;
-Button2 button_8;
+const int buttonPins[NUM_BUTTONS] = {15, 16, 17, 18, 1, 2, 42, 41};
+Button2 buttons[NUM_BUTTONS];
 
 #include <BleKeyboard.h>
 
@@ -68,40 +55,32 @@ void playToken(String token)
     }
 }
 
-void handleTap1(Button2 &b)
+void handleTap(Button2 &b)
 {
-    //
     if (!bleKeyboard.isConnected())
         return;
 
-    //
     JsonDocument &app = status();
-    String tokenList = app["config"]["button_1"].as<String>();
-    int start = 0;
-    while (start < tokenList.length())
+
+    int buttonId = b.getPin(); // get the pin number
+    int buttonIndex = -1;
+
+    // Map pin number to button index (1–8)
+    for (int i = 0; i < 8; i++)
     {
-        int end = tokenList.indexOf(',', start);
-        if (end == -1)
-            end = tokenList.length();
-
-        String token = tokenList.substring(start, end);
-        token.trim(); // Remove whitespace
-
-        playToken(token);
-
-        start = end + 1;
+        if (b.getPin() == buttonPins[i])
+        {
+            buttonIndex = i + 1;
+            break;
+        }
     }
-}
 
-void handleTap2(Button2 &b)
-{
-    //
-    if (!bleKeyboard.isConnected())
-        return;
+    if (buttonIndex == -1)
+        return; // invalid button    
 
-    //
-    JsonDocument &app = status();
-    String tokenList = app["config"]["button_2"].as<String>();
+    String key = "button_" + String(buttonIndex);
+    String tokenList = app["config"][key].as<String>();
+
     int start = 0;
     while (start < tokenList.length())
     {
@@ -110,155 +89,7 @@ void handleTap2(Button2 &b)
             end = tokenList.length();
 
         String token = tokenList.substring(start, end);
-        token.trim(); // Remove whitespace
-
-        playToken(token);
-
-        start = end + 1;
-    }
-}
-void handleTap3(Button2 &b)
-{
-    //
-    if (!bleKeyboard.isConnected())
-        return;
-
-    //
-    JsonDocument &app = status();
-    String tokenList = app["config"]["button_3"].as<String>();
-    int start = 0;
-    while (start < tokenList.length())
-    {
-        int end = tokenList.indexOf(',', start);
-        if (end == -1)
-            end = tokenList.length();
-
-        String token = tokenList.substring(start, end);
-        token.trim(); // Remove whitespace
-
-        playToken(token);
-
-        start = end + 1;
-    }
-}
-void handleTap4(Button2 &b)
-{
-    //
-    if (!bleKeyboard.isConnected())
-        return;
-
-    //
-    JsonDocument &app = status();
-    String tokenList = app["config"]["button_4"].as<String>();
-    int start = 0;
-    while (start < tokenList.length())
-    {
-        int end = tokenList.indexOf(',', start);
-        if (end == -1)
-            end = tokenList.length();
-
-        String token = tokenList.substring(start, end);
-        token.trim(); // Remove whitespace
-
-        playToken(token);
-
-        start = end + 1;
-    }
-}
-
-void handleTap5(Button2 &b)
-{
-    //
-    if (!bleKeyboard.isConnected())
-        return;
-
-    //
-    JsonDocument &app = status();
-    String tokenList = app["config"]["button_5"].as<String>();
-    int start = 0;
-    while (start < tokenList.length())
-    {
-        int end = tokenList.indexOf(',', start);
-        if (end == -1)
-            end = tokenList.length();
-
-        String token = tokenList.substring(start, end);
-        token.trim(); // Remove whitespace
-
-        playToken(token);
-
-        start = end + 1;
-    }
-}
-
-void handleTap6(Button2 &b)
-{
-    //
-    if (!bleKeyboard.isConnected())
-        return;
-
-    //
-    JsonDocument &app = status();
-    String tokenList = app["config"]["button_6"].as<String>();
-    int start = 0;
-    while (start < tokenList.length())
-    {
-        int end = tokenList.indexOf(',', start);
-        if (end == -1)
-            end = tokenList.length();
-
-        String token = tokenList.substring(start, end);
-        token.trim(); // Remove whitespace
-
-        playToken(token);
-
-        start = end + 1;
-    }
-}
-
-void handleTap7(Button2 &b)
-{
-    //
-    if (!bleKeyboard.isConnected())
-        return;
-
-    //
-    JsonDocument &app = status();
-    String tokenList = app["config"]["button_7"].as<String>();
-    int start = 0;
-    while (start < tokenList.length())
-    {
-        int end = tokenList.indexOf(',', start);
-        if (end == -1)
-            end = tokenList.length();
-
-        String token = tokenList.substring(start, end);
-        token.trim(); // Remove whitespace
-
-        playToken(token);
-
-        start = end + 1;
-    }
-}
-
-void handleTap8(Button2 &b)
-{
-    //
-    if (!bleKeyboard.isConnected())
-        return;
-
-    //
-    JsonDocument &app = status();
-    String tokenList = app["config"]["button_8"].as<String>();
-    int start = 0;
-    while (start < tokenList.length())
-    {
-        int end = tokenList.indexOf(',', start);
-        if (end == -1)
-            end = tokenList.length();
-
-        String token = tokenList.substring(start, end);
-        token.trim(); // Remove whitespace
+        token.trim();
 
         playToken(token);
 
@@ -268,42 +99,20 @@ void handleTap8(Button2 &b)
 
 void buttons_setup()
 {
-    button_1.begin(BUTTON_1);
-    button_1.setTapHandler(handleTap1);
+    for (int i = 0; i < NUM_BUTTONS; i++)
+    {
+        buttons[i].begin(buttonPins[i]);
+        buttons[i].setTapHandler(handleTap);
+    }
 
-    button_2.begin(BUTTON_2);
-    button_2.setTapHandler(handleTap2);
-
-    button_3.begin(BUTTON_3);
-    button_3.setTapHandler(handleTap3);
-
-    button_4.begin(BUTTON_4);
-    button_4.setTapHandler(handleTap4);
-
-    button_5.begin(BUTTON_5);
-    button_5.setTapHandler(handleTap5);
-
-    button_6.begin(BUTTON_6);
-    button_6.setTapHandler(handleTap6);
-
-    button_7.begin(BUTTON_7);
-    button_7.setTapHandler(handleTap7);
-
-    button_8.begin(BUTTON_8);
-    button_8.setTapHandler(handleTap8);
-
-    bleKeyboard.setName("ESP32 Macro Pad");
+    bleKeyboard.setName("Macro Pad");
     bleKeyboard.begin();
 }
 
 void buttons_loop()
 {
-    button_1.loop();
-    button_2.loop();
-    button_3.loop();
-    button_4.loop();
-    button_5.loop();
-    button_6.loop();
-    button_7.loop();
-    button_8.loop();
+    for (int i = 0; i < NUM_BUTTONS; i++)
+    {
+        buttons[i].loop();
+    }
 }
