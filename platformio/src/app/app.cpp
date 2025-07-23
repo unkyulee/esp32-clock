@@ -1,7 +1,6 @@
 //
 #include "app.h"
 #include "display/display.h"
-
 #include "app/FileSystem/FileSystemSPIFFS.h"
 
 // When app is not ready. Such as file system is not initialized

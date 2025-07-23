@@ -3,16 +3,24 @@
 #include "app/app.h"
 
 #include <RotaryEncoder.h>
+#include <Button2.h>
 
 RotaryEncoder *encoder = nullptr;
+Button2 button_knob;
 
 #define KNOB_A 45
 #define KNOB_B 48
+#define BUTTON_KNOB 40
 
 // This interrupt routine will be called on any change of one of the input signals
 void checkPosition()
 {
     encoder->tick(); // just call tick() to check the state.
+}
+
+void handleTapKnob(Button2 &b)
+{
+    display_input(9);
 }
 
 void knob_setup()
@@ -21,6 +29,10 @@ void knob_setup()
     // register interrupt routine
     attachInterrupt(digitalPinToInterrupt(KNOB_A), checkPosition, CHANGE);
     attachInterrupt(digitalPinToInterrupt(KNOB_B), checkPosition, CHANGE);
+
+    //
+    button_knob.begin(BUTTON_KNOB);
+    button_knob.setTapHandler(handleTapKnob);
 }
 
 //
@@ -32,6 +44,7 @@ void knob_loop()
     static unsigned long lastMoveTime = 0;
 
     encoder->tick(); // just call tick() to check the state.
+    button_knob.loop();
 
     int newPos = encoder->getPosition();
     int newDir = (int)encoder->getDirection();

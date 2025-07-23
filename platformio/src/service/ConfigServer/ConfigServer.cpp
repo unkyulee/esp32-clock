@@ -73,6 +73,21 @@ void onConfigGet(AsyncWebServerRequest *request)
         configString.replace("#tz#", app["config"]["tz"].as<String>().c_str());
         _debug("tz: %s\n", app["config"]["tz"].as<String>().c_str());
 
+        for (int i = 1; i <= 8; i++)
+        {
+            String key = "button_" + String(i);
+            String placeholder = "#" + key + "#";
+
+            if (!app["config"][key].is<String>())
+            {
+                app["config"][key] = "";
+            }
+
+            String value = app["config"][key].as<String>();
+            configString.replace(placeholder, value);
+            _debug("%s: %s\n", key.c_str(), value.c_str());
+        }
+
         //
         request->send(200, "text/html", configString);
     }
@@ -106,6 +121,23 @@ void onConfigSave(AsyncWebServerRequest *request)
     String tz = request->getParam("tz", true)->value();
     _debug("tz: %s\n", tz.c_str());
     app["config"]["tz"] = tz;
+
+    for (int i = 1; i <= 8; i++)
+    {
+        String key = "button_" + String(i);
+
+        if (request->hasParam(key, true))
+        {
+            String value = request->getParam(key, true)->value();
+            _debug("%s: %s\n", key.c_str(), value.c_str());
+            app["config"][key] = value;
+        }
+        else
+        {
+            _debug("%s not provided in request.\n", key.c_str());
+            app["config"][key] = "";
+        }
+    }
 
     //
     config_save();
