@@ -48,11 +48,8 @@ void playToken(String token)
         bleKeyboard.write(KEY_MEDIA_CONSUMER_CONTROL_CONFIGURATION);
     else if (token == "EMAIL_READER")
         bleKeyboard.write(KEY_MEDIA_EMAIL_READER);
-
     else
-    {
         bleKeyboard.write(token.c_str()[0]);
-    }
 }
 
 void handleTap(Button2 &b)
