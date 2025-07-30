@@ -1,0 +1,219 @@
+<!-- Simple WiFi Config Page -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>#name#</title>
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+  <style>
+    body {
+      background: #181c20;
+      color: #fff;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .container {
+      background: #23272b;
+      padding: 2rem 2.5rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+      min-width: 320px;
+    }
+
+    h2 {
+      margin-top: 0;
+      margin-bottom: 1.5rem;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-align: center;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-size: 1rem;
+      font-weight: 500;
+    }
+
+    input[type="text"],
+    input[type="password"] {
+      width: 100%;
+      padding: 0.7rem;
+      margin-bottom: 1.2rem;
+      border: none;
+      border-radius: 6px;
+      background: #2c3136;
+      color: #fff;
+      font-size: 1rem;
+      box-sizing: border-box;
+    }
+
+    input[type="text"]:focus,
+    input[type="password"]:focus {
+      outline: 2px solid #4e9cff;
+    }
+
+    button {
+      width: 100%;
+      padding: 0.8rem;
+      background: #4e9cff;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    button:hover {
+      background: #3578e5;
+    }
+  </style>
+</head>
+
+<body>
+  <form
+    class="container"
+    method="POST"
+    action="/save"
+  >
+    <h2>#name#</h2>
+
+    <label>Device Name</label>
+    <input
+      type="text"
+      id="name"
+      name="name"
+      value="#name#"
+      required
+    >
+
+    <hr>
+
+    <label>WiFi SSID</label>
+    <input
+      type="text"
+      id="ssid"
+      name="ssid"
+      value="#ssid#"
+      required
+    >
+
+    <label for="password">WiFi Password</label>
+    <input
+      type="password"
+      id="password"
+      name="password"
+      value="#password#"
+      required
+    >
+
+    <hr>
+
+    <label>NTP Server</label>
+    <input
+      type="text"
+      id="tzServer"
+      name="tzServer"
+      value="#tzServer#"
+      required
+    >
+
+    <label>TZ String</label>
+    <input
+      type="text"
+      id="tz"
+      name="tz"
+      value="#tz#"
+      required
+    >
+
+    <hr>
+
+    <label>Button 1</label>
+    <input
+      type="text"
+      id="button_1"
+      name="button_1"
+      value="#button_1#"
+      required
+    >
+
+    <label>Button 2</label>
+    <input
+      type="text"
+      id="button_2"
+      name="button_2"
+      value="#button_2#"
+      required
+    >
+
+    <label>Button 3</label>
+    <input
+      type="text"
+      id="button_3"
+      name="button_3"
+      value="#button_3#"
+      required
+    >
+
+    <label>Button 4</label>
+    <input
+      type="text"
+      id="button_4"
+      name="button_4"
+      value="#button_4#"
+      required
+    >
+
+    <label>Button 5</label>
+    <input
+      type="text"
+      id="button_5"
+      name="button_5"
+      value="#button_5#"
+      required
+    >
+
+    <label>Button 6</label>
+    <input
+      type="text"
+      id="button_6"
+      name="button_6"
+      value="#button_6#"
+      required
+    >
+
+    <label>Button 7</label>
+    <input
+      type="text"
+      id="button_7"
+      name="button_7"
+      value="#button_7#"
+      required
+    >
+
+    <label>Button 8</label>
+    <input
+      type="text"
+      id="button_8"
+      name="button_8"
+      value="#button_8#"
+      required
+    >
+
+    <button type="submit">Save</button>
+  </form>
+</body>
+
+</html>

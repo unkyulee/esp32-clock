@@ -1,0 +1,14 @@
+{
+  "ssid": "",
+  "password": "",
+  "tzServer": "pool.ntp.org",
+  "tz": "CET-1CEST,M3.5.0/2,M10.5.0/3",
+  "button_1": "PLAY_PAUSE",
+  "button_2": "PREVIOUS_TRACK",
+  "button_3": "NEXT_TRACK",
+  "button_4": "VOLUME_UP",
+  "button_5": "MUTE",
+  "button_6": "CALCULATOR",
+  "button_7": "LOCAL_MACHINE_BROWSER",
+  "button_8": "VOLUME_DOWN"
+}
