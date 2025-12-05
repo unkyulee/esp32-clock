@@ -15,10 +15,13 @@
       color: #fff;
       font-family: 'Segoe UI', Arial, sans-serif;
       display: flex;
+      flex-direction: column;
       align-items: center;
-      justify-content: center;
-      height: 100vh;
+      justify-content: flex-start;
+      min-height: 100vh;
       margin: 0;
+      padding: 1rem 0;
+      box-sizing: border-box;
     }
 
     .container {
@@ -166,11 +169,11 @@
 </head>
 
 <body>
-  <form
-    class="container"
-    method="POST"
-    action="/save"
-  >
+  <div class="container">
+    <form
+      method="POST"
+      action="/save"
+    >
     <h1>WiFi Setup</h1>
     <p>Select a network from the list or enter credentials manually.</p>
 
@@ -251,15 +254,60 @@
 
     <div class="actions">
       <button type="submit">Save</button>
-      <button
-        type="button"
-        class="secondary"
-        id="rescan-btn"
-      >
-        Rescan
-      </button>
     </div>
-  </form>
+    </form>
+
+    <button
+      type="button"
+      class="secondary"
+      id="advanced-toggle"
+      style="margin: 1rem 0 0.5rem;"
+    >
+      Advanced Mode
+    </button>
+
+    <div
+      class="section"
+      id="advanced-section"
+      style="margin-top: 0; display: none;"
+    >
+      <div class="section-header">
+        <div>
+          <strong>Firmware Update</strong>
+        </div>
+      </div>
+      <form
+        method="POST"
+        action="/update"
+        enctype="multipart/form-data"
+      >
+        <input
+          type="file"
+          name="firmware"
+          accept=".bin"
+        >
+        <button type="submit">Upload & Install</button>
+      </form>
+      <div style="height: 12px;"></div>
+      <div class="section-header">
+        <div>
+          <strong>Upload config.html</strong>
+        </div>
+      </div>
+      <form
+        method="POST"
+        action="/update-config"
+        enctype="multipart/form-data"
+      >
+        <input
+          type="file"
+          name="config"
+          accept=".html"
+        >
+        <button type="submit">Upload Config Page</button>
+      </form>
+    </div>
+  </div>
   <script>
     (function () {
       var tzSelect = document.getElementById('tz');
@@ -281,9 +329,11 @@
       var networksEl = document.getElementById('networks');
       var statusEl = document.getElementById('scan-status');
       var scanBtn = document.getElementById('scan-btn');
-      var rescanBtn = document.getElementById('rescan-btn');
+      var rescanBtn = null;
       var ssidInput = document.getElementById('ssid');
       var passwordInput = document.getElementById('password');
+      var advancedToggle = document.getElementById('advanced-toggle');
+      var advancedSection = document.getElementById('advanced-section');
 
       function setStatus(message) {
         statusEl.textContent = message;
@@ -353,8 +403,15 @@
       }
 
       scanBtn.addEventListener('click', scan);
-      rescanBtn.addEventListener('click', scan);
       scan();
+
+      if (advancedToggle && advancedSection) {
+        advancedToggle.addEventListener('click', function () {
+          var isHidden = advancedSection.style.display === 'none';
+          advancedSection.style.display = isHidden ? 'block' : 'none';
+          advancedToggle.textContent = isHidden ? 'Hide Advanced' : 'Advanced Mode';
+        });
+      }
     })();
   </script>
 </body>

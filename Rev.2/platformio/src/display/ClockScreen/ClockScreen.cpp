@@ -101,7 +101,7 @@ void ClockScreen_render(TFT_eSPI *ptft, U8g2_for_TFT_eSPI *pu8f)
             int16_t y = (SCREEN_HEIGHT / 2) - (textHeight / 2) + ascent; // center vertically using ascent/descent
 
             int16_t textWidth = pu8f->getUTF8Width(currentTime.c_str());
-            int16_t x = (SCREEN_WIDTH - textWidth) / 2 - 10; // shift slightly left
+            int16_t x = (SCREEN_WIDTH - textWidth) / 2 - 5; // shift slightly left
             pu8f->setCursor(x, y);
             pu8f->print(currentTime);
 

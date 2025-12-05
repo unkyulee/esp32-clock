@@ -5,11 +5,16 @@
 #include <SPIFFS.h>
 #include <WiFi.h>
 #include <ESPAsyncWebServer.h>
+#include <Update.h>
 
 AsyncWebServer server(80);
 void onConfigGet(AsyncWebServerRequest *request);
 void onConfigSave(AsyncWebServerRequest *request);
 void onConfigScan(AsyncWebServerRequest *request);
+void onFirmwareUpload(AsyncWebServerRequest *request);
+void handleFirmwareUpload(AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final);
+void onHtmlUpload(AsyncWebServerRequest *request);
+void handleHtmlUpload(AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final);
 
 //
 void startWebServer()
@@ -20,6 +25,8 @@ void startWebServer()
     //
     server.on("/save", HTTP_POST, onConfigSave);
     server.on("/scan", HTTP_GET, onConfigScan);
+    server.on("/update", HTTP_POST, onFirmwareUpload, handleFirmwareUpload);
+    server.on("/update-config", HTTP_POST, onHtmlUpload, handleHtmlUpload);
 
     //
     server.begin();
@@ -71,6 +78,89 @@ void onConfigGet(AsyncWebServerRequest *request)
 
         //
         request->send(200, "text/html", configString);
+    }
+}
+
+static bool _updateFailed = false;
+static bool _htmlUpdateFailed = false;
+static File _htmlUploadFile;
+
+//
+void handleFirmwareUpload(AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final)
+{
+    if (!index)
+    {
+        _log("[OTA] Starting update: %s\n", filename.c_str());
+        _updateFailed = false;
+        if (!Update.begin(UPDATE_SIZE_UNKNOWN))
+        {
+            _log("[OTA] Update begin failed: %s\n", Update.errorString());
+            _updateFailed = true;
+        }
+    }
+
+    if (!_updateFailed)
+    {
+        if (Update.write(data, len) != len)
+        {
+            _log("[OTA] Write failed: %s\n", Update.errorString());
+            _updateFailed = true;
+        }
+    }
+
+    if (final)
+    {
+        if (!_updateFailed && Update.end(true))
+        {
+            _log("[OTA] Update success, restarting soon.\n");
+        }
+        else
+        {
+            _log("[OTA] Update end failed: %s\n", Update.errorString());
+            _updateFailed = true;
+        }
+    }
+}
+
+//
+void handleHtmlUpload(AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final)
+{
+    if (!index)
+    {
+        _log("[HTML] Upload starting: %s\n", filename.c_str());
+        _htmlUpdateFailed = false;
+        if (_htmlUploadFile)
+            _htmlUploadFile.close();
+        _htmlUploadFile = gfs()->open("/config.html", "w");
+        if (!_htmlUploadFile)
+        {
+            _log("[HTML] Failed to open /config.html for write\n");
+            _htmlUpdateFailed = true;
+        }
+    }
+
+    if (!_htmlUpdateFailed && _htmlUploadFile)
+    {
+        size_t written = _htmlUploadFile.write(data, len);
+        if (written != len)
+        {
+            _log("[HTML] Write failed (expected %u wrote %u)\n", (unsigned)len, (unsigned)written);
+            _htmlUpdateFailed = true;
+        }
+    }
+
+    if (final)
+    {
+        if (_htmlUploadFile)
+            _htmlUploadFile.close();
+        if (_htmlUpdateFailed)
+        {
+            _log("[HTML] Upload failed\n");
+        }
+        else
+        {
+            _log("[HTML] Upload complete\n");
+        }
     }
 }
 
@@ -158,4 +248,36 @@ void onConfigSave(AsyncWebServerRequest *request)
     // Restart ESP32 after a short delay to apply new settings
     delay(1000);
     ESP.restart();
+}
+
+//
+void onFirmwareUpload(AsyncWebServerRequest *request)
+{
+    _log("onFirmwareUpload\n");
+
+    if (_updateFailed || Update.hasError())
+    {
+        request->send(500, "text/plain", "Firmware update failed");
+        _updateFailed = false; // reset
+        return;
+    }
+
+    request->send(200, "text/plain", "Update successful. Rebooting...");
+    delay(500);
+    ESP.restart();
+}
+
+//
+void onHtmlUpload(AsyncWebServerRequest *request)
+{
+    _log("onHtmlUpload\n");
+
+    if (_htmlUpdateFailed)
+    {
+        request->send(500, "text/plain", "Config upload failed");
+        _htmlUpdateFailed = false; // reset
+        return;
+    }
+
+    request->send(200, "text/plain", "Config page updated");
 }
