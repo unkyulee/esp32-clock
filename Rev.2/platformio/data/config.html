@@ -1,0 +1,357 @@
+<!-- Simple WiFi Config Page -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>The Clock</title>
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+  <style>
+    body {
+      background: #181c20;
+      color: #fff;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .container {
+      background: #23272b;
+      padding: 1.6rem 1.8rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+      min-width: 340px;
+      max-width: 540px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    h1 {
+      margin: 0 0 0.3rem;
+      font-size: 1.4rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-align: left;
+    }
+
+    p {
+      margin: 0 0 1.2rem;
+      color: #cfd7e3;
+      font-size: 0.95rem;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-size: 1rem;
+      font-weight: 500;
+    }
+
+    input[type="text"],
+    input[type="password"],
+    select {
+      width: 100%;
+      padding: 0.7rem;
+      margin-bottom: 1.2rem;
+      border: none;
+      border-radius: 6px;
+      background: #2c3136;
+      color: #fff;
+      font-size: 1rem;
+      box-sizing: border-box;
+    }
+
+    input[type="text"]:focus,
+    input[type="password"]:focus,
+    select:focus {
+      outline: 2px solid #4e9cff;
+    }
+
+    .actions {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 1.4rem;
+    }
+
+    button,
+    .secondary {
+      padding: 0.8rem;
+      border: none;
+      border-radius: 6px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    button {
+      background: #4e9cff;
+      color: #fff;
+      width: 100%;
+    }
+
+    button:hover {
+      background: #3578e5;
+    }
+
+    .secondary {
+      background: #2c3136;
+      color: #fff;
+      width: auto;
+      padding: 0.65rem 1rem;
+    }
+
+    .section {
+      background: #1e2227;
+      border-radius: 10px;
+      padding: 1rem 1.1rem;
+      margin-bottom: 1rem;
+      border: 1px solid #2f353c;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .status {
+      font-size: 0.9rem;
+      color: #cfd7e3;
+      margin-bottom: 0.5rem;
+    }
+
+    .network-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      max-height: 220px;
+      overflow-y: auto;
+    }
+
+    .network {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      padding: 0.6rem 0.7rem;
+      background: #262b31;
+      border-radius: 8px;
+      border: 1px solid #323841;
+      cursor: pointer;
+    }
+
+    .network:hover {
+      border-color: #4e9cff;
+    }
+
+    .network strong {
+      display: block;
+      color: #fff;
+      font-size: 1rem;
+    }
+
+    .meta {
+      color: #b6c2d2;
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+
+<body>
+  <form
+    class="container"
+    method="POST"
+    action="/save"
+  >
+    <h1>WiFi Setup</h1>
+    <p>Select a network from the list or enter credentials manually.</p>
+
+    <div class="section">
+      <div class="section-header">
+        <div>
+          <strong>Nearby Networks</strong>
+        </div>
+        <button
+          type="button"
+          class="secondary"
+          id="scan-btn"
+        >
+          Scan
+        </button>
+      </div>
+      <div
+        id="scan-status"
+        class="status"
+      >
+        Scanning...
+      </div>
+      <div
+        id="networks"
+        class="network-list"
+      ></div>
+    </div>
+
+    <label for="ssid">WiFi SSID</label>
+    <input
+      type="text"
+      id="ssid"
+      name="ssid"
+      value="#ssid#"
+      required
+    >
+
+    <label for="password">WiFi Password</label>
+    <input
+      type="password"
+      id="password"
+      name="password"
+      value="#password#"
+      required
+    >
+
+    <label for="tzServer">NTP Server</label>
+    <input
+      type="text"
+      id="tzServer"
+      name="tzServer"
+      value="pool.ntp.org"
+      required
+    >
+
+    <label for="tz">Time Zone</label>
+    <select
+      id="tz"
+      name="tz"
+      required
+    >
+      <option value="">Select your time zone</option>
+      <option value="UTC0">UTC (no DST)</option>
+      <option value="GMT0BST,M3.5.0/1,M10.5.0/2">United Kingdom</option>
+      <option value="CET-1CEST,M3.5.0/2,M10.5.0/3">Central Europe (Italy, Germany, France)</option>
+      <option value="EET-2EEST,M3.5.0/3,M10.5.0/4">Eastern Europe (Greece, Romania)</option>
+      <option value="MSK-3">Moscow</option>
+      <option value="IST-5:30">India</option>
+      <option value="CST-8">China</option>
+      <option value="JST-9">Japan</option>
+      <option value="KST-9">Korea (Seoul)</option>
+      <option value="AEST-10AEDT,M10.1.0,M4.1.0/3">Australia (Sydney)</option>
+      <option value="EST5EDT,M3.2.0,M11.1.0">US Eastern</option>
+      <option value="CST6CDT,M3.2.0,M11.1.0">US Central</option>
+      <option value="MST7MDT,M3.2.0,M11.1.0">US Mountain</option>
+      <option value="PST8PDT,M3.2.0,M11.1.0">US Pacific</option>
+    </select>
+
+    <div class="actions">
+      <button type="submit">Save</button>
+      <button
+        type="button"
+        class="secondary"
+        id="rescan-btn"
+      >
+        Rescan
+      </button>
+    </div>
+  </form>
+  <script>
+    (function () {
+      var tzSelect = document.getElementById('tz');
+      var currentTz = '#tz#';
+      if (!tzSelect || !currentTz) return;
+      var exists = Array.prototype.some.call(tzSelect.options, function (opt) {
+        return opt.value === currentTz;
+      });
+      if (!exists) {
+        var custom = document.createElement('option');
+        custom.value = currentTz;
+        custom.textContent = currentTz;
+        tzSelect.insertBefore(custom, tzSelect.firstChild);
+      }
+      tzSelect.value = currentTz;
+    })();
+
+    (function () {
+      var networksEl = document.getElementById('networks');
+      var statusEl = document.getElementById('scan-status');
+      var scanBtn = document.getElementById('scan-btn');
+      var rescanBtn = document.getElementById('rescan-btn');
+      var ssidInput = document.getElementById('ssid');
+      var passwordInput = document.getElementById('password');
+
+      function setStatus(message) {
+        statusEl.textContent = message;
+      }
+
+      function renderNetworks(list) {
+        networksEl.innerHTML = '';
+
+        if (!list || !list.length) {
+          setStatus('No networks found. You can still enter SSID manually.');
+          return;
+        }
+
+        list.forEach(function (net) {
+          if (!net.ssid) return;
+
+          var label = document.createElement('label');
+          label.className = 'network';
+
+          var radio = document.createElement('input');
+          radio.type = 'radio';
+          radio.name = 'network';
+          radio.value = net.ssid;
+          radio.checked = ssidInput.value === net.ssid;
+          radio.addEventListener('change', function () {
+            ssidInput.value = net.ssid;
+            passwordInput.focus();
+          });
+
+          var textWrap = document.createElement('div');
+          var ssidSpan = document.createElement('strong');
+          ssidSpan.textContent = net.ssid;
+          var metaSpan = document.createElement('span');
+          metaSpan.className = 'meta';
+          metaSpan.textContent = (net.secure ? 'Secured' : 'Open') + ' • ' + net.rssi + ' dBm';
+
+          textWrap.appendChild(ssidSpan);
+          textWrap.appendChild(metaSpan);
+
+          label.appendChild(radio);
+          label.appendChild(textWrap);
+          networksEl.appendChild(label);
+        });
+
+        setStatus('Select a network or enter one manually.');
+      }
+
+      function scan() {
+        setStatus('Scanning...');
+        networksEl.innerHTML = '';
+        fetch('/scan')
+          .then(function (res) {
+            if (!res.ok) throw new Error('Scan failed');
+            return res.json();
+          })
+          .then(function (data) {
+            renderNetworks((data && data.networks) || []);
+          })
+          .catch(function () {
+            setStatus('Scan failed. You can still enter SSID manually.');
+          });
+      }
+
+      scanBtn.addEventListener('click', scan);
+      rescanBtn.addEventListener('click', scan);
+      scan();
+    })();
+  </script>
+</body>
+
+</html>
