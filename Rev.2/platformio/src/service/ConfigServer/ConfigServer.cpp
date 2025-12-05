@@ -79,16 +79,38 @@ void onConfigScan(AsyncWebServerRequest *request)
 {
     _log("onConfigScan\n");
 
+    // Start async scan if not running
     WiFi.mode(WIFI_AP_STA);
-    int16_t count = WiFi.scanNetworks();
-    _debug("scan results: %d\n", count);
+    int16_t result = WiFi.scanComplete(); // -1 scanning, -2 not started
+    _log("scan status: %d\n", result);
 
-    DynamicJsonDocument doc(1024 + (count > 0 ? count * 80 : 0));
-    JsonArray networks = doc.createNestedArray("networks");
-
-    for (int i = 0; i < count; i++)
+    if (result < 0)
     {
-        JsonObject net = networks.createNestedObject();
+        // kick off a new async scan if idle
+        if (result == -2)
+        {
+            WiFi.scanNetworks(true, true); // async scan with hidden nets and filter duplicates
+            _log("starting async scan\n");
+        }
+
+        JsonDocument doc;
+        doc["status"] = "scanning";
+        doc["networks"].to<JsonArray>(); // empty list
+
+        String payload;
+        serializeJson(doc, payload);
+        request->send(200, "application/json", payload);
+        return;
+    }
+
+    // Completed with results
+    JsonDocument doc;
+    JsonArray networks = doc["networks"].to<JsonArray>();
+    doc["status"] = "complete";
+
+    for (int i = 0; i < result; i++)
+    {
+        JsonObject net = networks.add<JsonObject>();
         net["ssid"] = WiFi.SSID(i);
         net["rssi"] = WiFi.RSSI(i);
         wifi_auth_mode_t auth = WiFi.encryptionType(i);
@@ -99,6 +121,7 @@ void onConfigScan(AsyncWebServerRequest *request)
     String payload;
     serializeJson(doc, payload);
     request->send(200, "application/json", payload);
+    _log(payload.c_str()); 
 }
 
 //
@@ -131,4 +154,8 @@ void onConfigSave(AsyncWebServerRequest *request)
 
     //
     onConfigGet(request);
+
+    // Restart ESP32 after a short delay to apply new settings
+    delay(1000);
+    ESP.restart();
 }

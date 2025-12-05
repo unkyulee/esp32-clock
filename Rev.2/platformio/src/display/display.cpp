@@ -8,6 +8,7 @@
 #include "display/TimerScreen/TimerScreen.h"
 #include "display/Menu/Menu.h"
 #include "display/AlarmScreen/AlarmScreen.h"
+#include "display/WiFiInfoScreen/WifiInfoScreen.h"
 
 // Invoke library, pins defined in platformio.ini
 TFT_eSPI tft = TFT_eSPI();
@@ -43,7 +44,7 @@ void display_setup()
 void display_loop()
 {
   static unsigned int last = 0;
-  if (millis() - last > 150)
+  if (millis() - last > 300)
   {
     last = millis();
 
@@ -117,6 +118,17 @@ void display_loop()
         AlarmScreen_render(&tft, &u8f);
     }
 
+    // WiFi Info Screen
+    else if (screen == WIFIINFOSCREEN)
+    {
+      // setup only once
+      if (screen != screen_prev)
+        WiFiInfoScreen_setup(&tft, &u8f);
+      else
+        // loop
+        WiFiInfoScreen_render(&tft, &u8f);
+    }
+
     //
     app["screen_prev"] = screen;
   }
@@ -149,5 +161,10 @@ void display_input(int key)
   else if (screen == ALARMSCREEN)
   {
     AlarmScreen_input(key);
+  }
+
+  else if (screen == WIFIINFOSCREEN)
+  {
+    WiFiInfoScreen_input(key);
   }
 }

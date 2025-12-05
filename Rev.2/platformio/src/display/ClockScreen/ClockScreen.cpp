@@ -52,10 +52,13 @@ void ClockScreen_render(TFT_eSPI *ptft, U8g2_for_TFT_eSPI *pu8f)
             pu8f->setFontMode(1);
 
             // Draw the big centered clock
+            int16_t ascent = pu8f->getFontAscent();
+            int16_t descent = pu8f->getFontDescent();
+            int16_t textHeight = ascent - descent;
+            int16_t y = (SCREEN_HEIGHT / 2) - (textHeight / 2) + ascent; // center vertically using ascent/descent
+
             int16_t textWidth = pu8f->getUTF8Width(currentTime.c_str());
-            int16_t textHeight = pu8f->getFontAscent() - pu8f->getFontDescent();
-            int16_t x = (SCREEN_WIDTH - textWidth) / 2;
-            int16_t y = (SCREEN_HEIGHT + textHeight - 25) / 2;
+            int16_t x = (SCREEN_WIDTH - textWidth) / 2 - 10; // shift slightly left
             pu8f->setCursor(x, y);
             pu8f->print(currentTime);
 

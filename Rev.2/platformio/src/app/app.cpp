@@ -2,6 +2,8 @@
 #include "app.h"
 #include "display/display.h"
 #include "app/FileSystem/FileSystemSPIFFS.h"
+#include <Arduino.h>
+#include <time.h>
 
 //
 #include "service/Buzzer/Buzzer.h"
@@ -14,6 +16,10 @@ bool app_ready()
 {
     return _ready;
 }
+
+// track daily reboot
+static int lastRebootDay = -1;
+static unsigned long lastRebootCheck = 0;
 
 // Main object for the setup is to initialize the device
 // set up the serial communication
@@ -64,8 +70,25 @@ void app_loop()
         return;
     }
 
-    // 
+    //
     buzzer_loop();
+
+    // daily restart at 01:00 to reset state
+    if (millis() - lastRebootCheck > 1000)
+    {
+        lastRebootCheck = millis();
+        struct tm timeinfo;
+        if (getLocalTime(&timeinfo))
+        {
+            if (timeinfo.tm_hour == 1 && timeinfo.tm_min == 0 && timeinfo.tm_mday != lastRebootDay)
+            {
+                lastRebootDay = timeinfo.tm_mday;
+                _log("Scheduled reboot at 01:00\n");
+                delay(1000); // allow log flush
+                ESP.restart();
+            }
+        }
+    }
 }
 
 // status storage

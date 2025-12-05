@@ -4,7 +4,7 @@
 #include "service/Knob/Knob.h"
 
 //
-const int totalMenu = 3;
+const int totalMenu = 4;
 int selectedMenu = 0;
 
 //
@@ -30,7 +30,7 @@ void Menu_render(TFT_eSPI *ptft, U8g2_for_TFT_eSPI *pu8f)
     pu8f->setBackgroundColor(TFT_BLACK);
     pu8f->setFontMode(1);
 
-    const char *menuItems[totalMenu] = {"Clock", "Timer", "Alarm"};
+    const char *menuItems[totalMenu] = {"Clock", "Timer", "Alarm", "WiFi"};
 
     // Layout
     int itemHeight = 40;
@@ -93,7 +93,6 @@ void Menu_input(int key)
     break;
 
     case KNOB_CLICK: // KNOB Click to start/pause
-
         switch (selectedMenu)
         {
         case 0:
@@ -106,6 +105,10 @@ void Menu_input(int key)
 
         case 2:
             app["screen"] = ALARMSCREEN;
+            break;
+
+        case 3:
+            app["screen"] = WIFIINFOSCREEN;
             break;
         }
 

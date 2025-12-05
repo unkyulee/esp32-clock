@@ -8,7 +8,7 @@ void startAccessPoint()
 {
     JsonDocument &app = status();
 
-    const char *ap_ssid = "ESP32 Clock";
+    const char *ap_ssid = "The Clock";
     const char *ap_password = nullptr; // Open network, or set a password if desired
 
     if(app["config"]["name"].is<String>())
