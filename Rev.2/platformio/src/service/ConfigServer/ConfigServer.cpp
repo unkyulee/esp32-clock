@@ -91,6 +91,12 @@ void handleFirmwareUpload(AsyncWebServerRequest *request, String filename, size_
     if (!index)
     {
         _log("[OTA] Starting update: %s\n", filename.c_str());
+        if (!filename.equalsIgnoreCase("firmware.bin"))
+        {
+            _log("[OTA] Invalid filename, expected firmware.bin\n");
+            _updateFailed = true;
+            return;
+        }
         _updateFailed = false;
         if (!Update.begin(UPDATE_SIZE_UNKNOWN))
         {
@@ -128,6 +134,12 @@ void handleHtmlUpload(AsyncWebServerRequest *request, String filename, size_t in
     if (!index)
     {
         _log("[HTML] Upload starting: %s\n", filename.c_str());
+        if (!filename.equalsIgnoreCase("config.html"))
+        {
+            _log("[HTML] Invalid filename, expected config.html\n");
+            _htmlUpdateFailed = true;
+            return;
+        }
         _htmlUpdateFailed = false;
         if (_htmlUploadFile)
             _htmlUploadFile.close();
