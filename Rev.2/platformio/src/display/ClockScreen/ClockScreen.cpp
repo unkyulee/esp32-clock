@@ -37,6 +37,49 @@ void ClockScreen_render(TFT_eSPI *ptft, U8g2_for_TFT_eSPI *pu8f)
         String alarmTime = "";
         if (app["config"]["alarm"].is<String>())
             alarmTime = app["config"]["alarm"].as<String>();
+        // Load alarm days mask (Mon-Sun) or fallback to weekday flag
+        bool alarmDays[7] = {true, true, true, true, true, false, false};
+        if (app["config"]["alarmDays"].is<String>())
+        {
+            String mask = app["config"]["alarmDays"].as<String>();
+            if (mask.length() == 7)
+            {
+                for (int i = 0; i < 7; ++i)
+                    alarmDays[i] = (mask.charAt(i) == '1');
+            }
+        }
+        else if (app["config"]["alarmWeekdays"].is<bool>())
+        {
+            bool weekdaysOnly = app["config"]["alarmWeekdays"].as<bool>();
+            for (int i = 0; i < 7; ++i)
+                alarmDays[i] = (i < 5) ? weekdaysOnly : true;
+        }
+
+        // Decide if alarm banner should show (within next 12 hours)
+        bool showAlarmBanner = false;
+        String alarmBannerText = alarmTime;
+        if (alarmEnabled && alarmTime.length() == 5)
+        {
+            int alarmHour = alarmTime.substring(0, 2).toInt();
+            int alarmMinute = alarmTime.substring(3, 5).toInt();
+            int currentDay = (timeinfo.tm_wday + 6) % 7; // 0 = Mon
+            int nowMinutes = currentDay * 1440 + timeinfo.tm_hour * 60 + timeinfo.tm_min;
+            int bestDiff = 7 * 1440 + 1;
+            for (int i = 0; i < 7; ++i)
+            {
+                int dayIdx = (currentDay + i) % 7;
+                if (!alarmDays[dayIdx])
+                    continue;
+                int candidate = (currentDay + i) * 1440 + alarmHour * 60 + alarmMinute;
+                int diff = candidate - nowMinutes;
+                if (diff <= 0)
+                    diff += 7 * 1440;
+                if (diff < bestDiff)
+                    bestDiff = diff;
+            }
+            if (bestDiff <= 24 * 60)
+                showAlarmBanner = true;
+        }
 
         // === Only re-render screen if time changed ===
         if (prevTime != currentTime)
@@ -62,19 +105,31 @@ void ClockScreen_render(TFT_eSPI *ptft, U8g2_for_TFT_eSPI *pu8f)
             pu8f->setCursor(x, y);
             pu8f->print(currentTime);
 
-            // === Draw alarm time in top-right corner ===
-            if (alarmEnabled && alarmTime.length() > 0)
+            // === Draw alarm indicator as a bottom banner if upcoming ===
+            if (showAlarmBanner)
             {
-                pu8f->setFont(u8g2_font_6x13_tf); // small, unobtrusive font
-                pu8f->setForegroundColor(TFT_YELLOW);
-                pu8f->setCursor(10, 220);
-                pu8f->print(alarmTime);
+                int barH = 26;
+                sprite.fillRect(0, SCREEN_HEIGHT - barH, SCREEN_WIDTH, barH, TFT_DARKGREY);
+                pu8f->setFont(u8g2_font_helvR14_tf);
+                pu8f->setBackgroundColor(TFT_DARKGREY);
+                pu8f->setForegroundColor(TFT_WHITE);
+                int16_t tW = pu8f->getUTF8Width(alarmBannerText.c_str());
+                int16_t tH = pu8f->getFontAscent() - pu8f->getFontDescent();
+                int16_t xAlarm = (SCREEN_WIDTH - tW) / 2;
+                int16_t yAlarm = SCREEN_HEIGHT - barH + (barH + tH) / 2 - 5;
+                pu8f->setCursor(xAlarm, yAlarm);
+                pu8f->print(alarmBannerText);
 
                 // === Trigger alarm ringing ===
                 if (alarmTime == currentTime && alarmTime.length() > 0)
                 {
-                    app["ring"] = true;
-                    app["ring_start"] = true;
+                    // tm_wday: 0=Sun, 1=Mon, ... 6=Sat
+                    int idx = (timeinfo.tm_wday + 6) % 7; // convert so 0=Mon,6=Sun
+                    if (alarmDays[idx])
+                    {
+                        app["ring"] = true;
+                        app["ring_start"] = true;
+                    }
                 }
             }
 

@@ -7,6 +7,9 @@
 
 RotaryEncoder *encoder = nullptr;
 Button2 button_knob;
+static bool knobPressed = false;
+static unsigned long knobPressStart = 0;
+static unsigned long lastHoldSent = 0;
 
 #define KNOB_A 45
 #define KNOB_B 48
@@ -23,6 +26,18 @@ void handleTapKnob(Button2 &b)
     display_input(9);
 }
 
+void handlePress(Button2 &b)
+{
+    knobPressed = true;
+    knobPressStart = millis();
+    lastHoldSent = knobPressStart;
+}
+
+void handleRelease(Button2 &b)
+{
+    knobPressed = false;
+}
+
 void knob_setup()
 {
     encoder = new RotaryEncoder(KNOB_A, KNOB_B, RotaryEncoder::LatchMode::TWO03);
@@ -33,6 +48,8 @@ void knob_setup()
     //
     button_knob.begin(BUTTON_KNOB);
     button_knob.setTapHandler(handleTapKnob);
+    button_knob.setPressedHandler(handlePress);
+    button_knob.setReleasedHandler(handleRelease);
 }
 
 //
@@ -88,5 +105,16 @@ void knob_loop()
     {
         dirCount = 0;
         lastDir = 0;
+    }
+
+    // Send hold events after press held for 500ms, repeat every 150ms
+    if (knobPressed)
+    {
+        unsigned long now = millis();
+        if (now - knobPressStart > 500 && now - lastHoldSent > 150)
+        {
+            display_input(KNOB_HOLD);
+            lastHoldSent = now;
+        }
     }
 }
