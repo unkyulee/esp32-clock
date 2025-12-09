@@ -2,8 +2,6 @@
 
 "The Clock" is a DIY project for people who care about how things look as much as how they work. Clean, minimal, and a little bit obsessive, it is designed to evolve over time. New design ideas, new cases, new features. The long term goal is to build the ultimate desk clock.
 
-<img src="./Rev.2/images/clock.jpg" width="600px" />
-
 ---
 
 ## What is this project about?
