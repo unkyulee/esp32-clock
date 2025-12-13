@@ -84,7 +84,7 @@ void app_loop()
             {
                 lastRebootDay = timeinfo.tm_mday;
                 _log("Scheduled reboot at 01:00\n");
-                delay(1000); // allow log flush
+                delay(60* 1000); // Prevent multiple reboot within the same minute
                 ESP.restart();
             }
         }

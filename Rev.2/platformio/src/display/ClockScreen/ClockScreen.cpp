@@ -55,14 +55,27 @@ void ClockScreen_render(TFT_eSPI *ptft, U8g2_for_TFT_eSPI *pu8f)
                 alarmDays[i] = (i < 5) ? weekdaysOnly : true;
         }
 
-        // Decide if alarm banner should show (within next 12 hours)
+        // Precompute alarm hour/minute once
+        bool alarmConfigured = alarmEnabled && alarmTime.length() == 5;
+        int alarmHour = alarmConfigured ? alarmTime.substring(0, 2).toInt() : -1;
+        int alarmMinute = alarmConfigured ? alarmTime.substring(3, 5).toInt() : -1;
+        int currentDay = (timeinfo.tm_wday + 6) % 7; // 0 = Mon
+
+        // Decide if alarm should ring right now (independent of banner)
+        if (alarmConfigured && timeinfo.tm_hour == alarmHour && timeinfo.tm_min == alarmMinute)
+        {
+            if (alarmDays[currentDay])
+            {
+                app["ring"] = true;
+                app["ring_start"] = true;
+            }
+        }
+
+        // Decide if alarm banner should show (within next 24 hours)
         bool showAlarmBanner = false;
         String alarmBannerText = alarmTime;
-        if (alarmEnabled && alarmTime.length() == 5)
+        if (alarmConfigured)
         {
-            int alarmHour = alarmTime.substring(0, 2).toInt();
-            int alarmMinute = alarmTime.substring(3, 5).toInt();
-            int currentDay = (timeinfo.tm_wday + 6) % 7; // 0 = Mon
             int nowMinutes = currentDay * 1440 + timeinfo.tm_hour * 60 + timeinfo.tm_min;
             int bestDiff = 7 * 1440 + 1;
             for (int i = 0; i < 7; ++i)
@@ -72,7 +85,7 @@ void ClockScreen_render(TFT_eSPI *ptft, U8g2_for_TFT_eSPI *pu8f)
                     continue;
                 int candidate = (currentDay + i) * 1440 + alarmHour * 60 + alarmMinute;
                 int diff = candidate - nowMinutes;
-                if (diff <= 0)
+                if (diff < 0)
                     diff += 7 * 1440;
                 if (diff < bestDiff)
                     bestDiff = diff;
@@ -119,18 +132,6 @@ void ClockScreen_render(TFT_eSPI *ptft, U8g2_for_TFT_eSPI *pu8f)
                 int16_t yAlarm = SCREEN_HEIGHT - barH + (barH + tH) / 2 - 5;
                 pu8f->setCursor(xAlarm, yAlarm);
                 pu8f->print(alarmBannerText);
-
-                // === Trigger alarm ringing ===
-                if (alarmTime == currentTime && alarmTime.length() > 0)
-                {
-                    // tm_wday: 0=Sun, 1=Mon, ... 6=Sat
-                    int idx = (timeinfo.tm_wday + 6) % 7; // convert so 0=Mon,6=Sun
-                    if (alarmDays[idx])
-                    {
-                        app["ring"] = true;
-                        app["ring_start"] = true;
-                    }
-                }
             }
 
             sprite.pushSprite(0, 0);
