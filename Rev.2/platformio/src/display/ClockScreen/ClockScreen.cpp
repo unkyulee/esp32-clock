@@ -5,6 +5,8 @@
 
 // Refresh Screen Trigger
 String prevTime = "";
+static int lastRingDay = -1;     // day of month of the last ring
+static int lastRingMinute = -1;  // minute-of-day of the last ring
 
 //
 void ClockScreen_setup(TFT_eSPI *ptft, U8g2_for_TFT_eSPI *pu8f)
@@ -64,10 +66,14 @@ void ClockScreen_render(TFT_eSPI *ptft, U8g2_for_TFT_eSPI *pu8f)
         // Decide if alarm should ring right now (independent of banner)
         if (alarmConfigured && timeinfo.tm_hour == alarmHour && timeinfo.tm_min == alarmMinute)
         {
-            if (alarmDays[currentDay])
+            int minuteOfDay = timeinfo.tm_hour * 60 + timeinfo.tm_min;
+            bool alreadyRangThisMinute = (timeinfo.tm_mday == lastRingDay && minuteOfDay == lastRingMinute);
+            if (alarmDays[currentDay] && !alreadyRangThisMinute)
             {
                 app["ring"] = true;
                 app["ring_start"] = true;
+                lastRingDay = timeinfo.tm_mday;
+                lastRingMinute = minuteOfDay;
             }
         }
 
