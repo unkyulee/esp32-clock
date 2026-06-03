@@ -8,13 +8,18 @@
 #include "service/Time/Time.h"
 
 //
+#include <Arduino.h>
 #include <WiFi.h>
 #include <functional>
+
+static const unsigned long WIFI_SCREEN_RESET_INTERVAL_MS = 10UL * 60UL * 1000UL;
+static unsigned long wifiScreenStartedAt = 0;
 
 //
 void WiFiScreen_setup(TFT_eSPI *ptft)
 {
     ptft->fillScreen(TFT_BLACK);
+    wifiScreenStartedAt = millis();
     _log("WiFi Screen Setup\n");
 }
 
@@ -97,6 +102,7 @@ void WiFiScreen_render(TFT_eSPI *ptft)
 
     if (app["wifi"])
     {
+        wifiScreenStartedAt = 0;
         mode = WIFISCREEN_CONNECTED;
         if (mode != prevMode)
         {
@@ -155,6 +161,16 @@ void WiFiScreen_render(TFT_eSPI *ptft)
     // Start AP
     else
     {
+        if (wifiScreenStartedAt == 0)
+            wifiScreenStartedAt = millis();
+
+        if (millis() - wifiScreenStartedAt >= WIFI_SCREEN_RESET_INTERVAL_MS)
+        {
+            _log("WiFiScreen timeout. Restarting ESP32.\n");
+            delay(100);
+            ESP.restart();
+        }
+
         if (app["apIP"].is<String>() == false)
         {
             mode = WIFISCREEN_NOT_CONNECTED;

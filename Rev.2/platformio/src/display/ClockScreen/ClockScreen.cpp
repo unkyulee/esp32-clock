@@ -7,11 +7,29 @@
 String prevTime = "";
 static int lastRingDay = -1;     // day of month of the last ring
 static int lastRingMinute = -1;  // minute-of-day of the last ring
+static const unsigned long SECONDS_VISIBLE_DURATION_MS = 60UL * 60UL * 1000UL;
+static unsigned long secondsVisibleUntil = 0;
+
+static bool shouldShowSeconds()
+{
+    if (secondsVisibleUntil == 0)
+        return false;
+
+    if ((long)(millis() - secondsVisibleUntil) < 0)
+        return true;
+
+    secondsVisibleUntil = 0;
+    return false;
+}
 
 //
 void ClockScreen_setup(TFT_eSPI *ptft, U8g2_for_TFT_eSPI *pu8f)
 {
     _log("Clock Screen Setup\n");
+
+    JsonDocument &app = status();
+    if (app["screen_prev"].as<int>() == MENUSCREEN)
+        secondsVisibleUntil = millis() + SECONDS_VISIBLE_DURATION_MS;
 
     //
     ptft->fillScreen(TFT_BLACK);
@@ -33,6 +51,12 @@ void ClockScreen_render(TFT_eSPI *ptft, U8g2_for_TFT_eSPI *pu8f)
         char buf[6];
         strftime(buf, sizeof(buf), "%H:%M", &timeinfo);
         String currentTime = String(buf);
+
+        char secondBuf[3];
+        strftime(secondBuf, sizeof(secondBuf), "%S", &timeinfo);
+        String currentSecond = String(secondBuf);
+        bool showSeconds = shouldShowSeconds();
+        String currentRenderTime = showSeconds ? currentTime + ":" + currentSecond : currentTime;
 
         JsonDocument &app = status();
         bool alarmEnabled = app["config"]["alarmEnabled"].as<bool>();
@@ -101,7 +125,7 @@ void ClockScreen_render(TFT_eSPI *ptft, U8g2_for_TFT_eSPI *pu8f)
         }
 
         // === Only re-render screen if time changed ===
-        if (prevTime != currentTime)
+        if (prevTime != currentRenderTime)
         {
             TFT_eSprite sprite = display_sprite();
             sprite.createSprite(SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -124,6 +148,25 @@ void ClockScreen_render(TFT_eSPI *ptft, U8g2_for_TFT_eSPI *pu8f)
             pu8f->setCursor(x, y);
             pu8f->print(currentTime);
 
+            if (showSeconds)
+            {
+                // Draw seconds under the main clock without changing the clock layout.
+                int16_t bigBottom = y - descent;
+                pu8f->setFont(u8g2_font_logisoso32_tn);
+                int16_t secondWidth = pu8f->getUTF8Width(currentSecond.c_str());
+                int16_t secondAscent = pu8f->getFontAscent();
+                int16_t secondDescent = pu8f->getFontDescent();
+                int16_t xSecond = (SCREEN_WIDTH - secondWidth) / 2;
+                int16_t ySecond = bigBottom + 6 + secondAscent;
+                int16_t secondMaxBottom = SCREEN_HEIGHT - 4;
+                if (showAlarmBanner)
+                    secondMaxBottom -= 26;
+                if (ySecond - secondDescent > secondMaxBottom)
+                    ySecond = secondMaxBottom + secondDescent;
+                pu8f->setCursor(xSecond, ySecond);
+                pu8f->print(currentSecond);
+            }
+
             // === Draw alarm indicator as a bottom banner if upcoming ===
             if (showAlarmBanner)
             {
@@ -145,7 +188,7 @@ void ClockScreen_render(TFT_eSPI *ptft, U8g2_for_TFT_eSPI *pu8f)
             sprite.deleteSprite();
             pu8f->begin(*ptft);
 
-            prevTime = currentTime;
+            prevTime = currentRenderTime;
         }
     }
 }
