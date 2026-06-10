@@ -1,12 +1,13 @@
 //
 #include "app.h"
 #include "display/display.h"
-#include "app/FileSystem/FileSystemSPIFFS.h"
+#include "app/FileSystem/FileSystemFAT.h"
 #include <Arduino.h>
 #include <time.h>
 
 //
 #include "service/Buzzer/Buzzer.h"
+#include "service/MassStorage/MassStorage.h"
 
 // When app is not ready. Such as file system is not initialized
 // then no more operation should occur.
@@ -73,6 +74,9 @@ void app_loop()
     //
     buzzer_loop();
 
+    //
+    ms_loop();
+
     // daily restart at 01:00 to reset state
     if (millis() - lastRebootCheck > 1000)
     {
@@ -105,7 +109,7 @@ FileSystem *gfs()
     if (fileSystem == nullptr)
     {
         // ESP32 will use SD card as a main file system
-        fileSystem = new FileSystemSPIFFS();
+        fileSystem = new FileSystemFAT();
         if (!fileSystem->begin())
         {
             //
