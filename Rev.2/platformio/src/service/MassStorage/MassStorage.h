@@ -8,17 +8,28 @@
 #include "esp_partition.h"
 #include "wear_levelling.h"
 
+void ms_setup();
 void ms_loop();
 
 class FatFSUSBClass
 {
 public:
+    bool setupUSB();
     bool begin();
     void end();
     void unplug();
     bool isConnected();
+    bool isHostConnected();
+    bool isEjected();
 
 private:
+    static void usbEventCallback(
+        void *arg,
+        esp_event_base_t event_base,
+        int32_t event_id,
+        void *event_data
+    );
+
     static int32_t readCallback(
         uint32_t lba,
         uint32_t offset,
@@ -45,6 +56,8 @@ private:
     static uint8_t *sectorBuffer;
 
     static bool usbStarted;
+    static bool usbConfigured;
+    static volatile bool hostConnected;
     static bool mediaStarted;
     static bool ejected;
 

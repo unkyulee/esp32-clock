@@ -6,6 +6,8 @@ wl_handle_t FatFSUSBClass::wlHandle = WL_INVALID_HANDLE;
 uint8_t *FatFSUSBClass::sectorBuffer = nullptr;
 
 bool FatFSUSBClass::usbStarted = false;
+bool FatFSUSBClass::usbConfigured = false;
+volatile bool FatFSUSBClass::hostConnected = false;
 bool FatFSUSBClass::mediaStarted = false;
 bool FatFSUSBClass::ejected = false;
 
@@ -14,6 +16,25 @@ uint16_t FatFSUSBClass::blockSize = 0;
 size_t FatFSUSBClass::mediaSize = 0;
 
 FatFSUSBClass FatFSUSB;
+
+//
+void ms_setup()
+{
+    JsonDocument &app = status();
+    app["usbConnected"] = false;
+    app["massStorage"] = false;
+    app["massStorageStarted"] = false;
+    app["massStorageEjected"] = false;
+
+    if (FatFSUSB.setupUSB())
+    {
+        _log("USB Mass Storage waiting for host\n");
+    }
+    else
+    {
+        _log("USB Mass Storage setup failed\n");
+    }
+}
 
 //
 void ms_loop()
@@ -29,8 +50,14 @@ void ms_loop()
 
     JsonDocument &app = status();
 
-    bool massStorageRequest = app["massStorage"].as<bool>();
+    bool usbConnected = FatFSUSB.isHostConnected();
+    bool massStorageEjected = FatFSUSB.isEjected();
+    bool massStorageRequest = usbConnected && !massStorageEjected;
     bool massStorageStarted = app["massStorageStarted"].as<bool>();
+
+    app["usbConnected"] = usbConnected;
+    app["massStorage"] = massStorageRequest;
+    app["massStorageEjected"] = massStorageEjected;
 
     if (massStorageRequest)
     {
@@ -61,6 +88,16 @@ void ms_loop()
 
             app["massStorageStarted"] = false;
             app["massStorage"] = false;
+            app["massStorageEjected"] = true;
+
+            if (gfs()->begin())
+            {
+                _log("FAT file system restored\n");
+            }
+            else
+            {
+                _log("FAT file system restore failed\n");
+            }
 
             _log("FatFSUSB ejected\n");
         }
@@ -69,13 +106,49 @@ void ms_loop()
     {
         if (massStorageStarted)
         {
-            FatFSUSB.unplug();
             FatFSUSB.end();
 
             app["massStorageStarted"] = false;
+            app["massStorageEjected"] = FatFSUSB.isEjected();
+
+            if (gfs()->begin())
+            {
+                _log("FAT file system restored\n");
+            }
+            else
+            {
+                _log("FAT file system restore failed\n");
+            }
+
             _log("FatFSUSB end\n");
         }
     }
+}
+
+bool FatFSUSBClass::setupUSB()
+{
+    if (!usbConfigured)
+    {
+        USB.onEvent(usbEventCallback);
+
+        msc.vendorID("ESP32S3");
+        msc.productID("FlashDisk");
+        msc.productRevision("1.0");
+
+        msc.onRead(readCallback);
+        msc.onWrite(writeCallback);
+        msc.onStartStop(startStopCallback);
+        msc.mediaPresent(false);
+
+        usbConfigured = true;
+    }
+
+    if (!usbStarted)
+    {
+        usbStarted = USB.begin();
+    }
+
+    return usbStarted;
 }
 
 bool FatFSUSBClass::begin()
@@ -83,6 +156,12 @@ bool FatFSUSBClass::begin()
     if (mediaStarted)
     {
         return true;
+    }
+
+    if (!setupUSB())
+    {
+        Serial.println("MassStorageESP32: USB begin failed");
+        return false;
     }
 
     const esp_partition_t *partition = esp_partition_find_first(
@@ -151,16 +230,6 @@ bool FatFSUSBClass::begin()
         return false;
     }
 
-    msc.vendorID("ESP32S3");
-    msc.productID("FlashDisk");
-    msc.productRevision("1.0");
-
-    msc.onRead(readCallback);
-    msc.onWrite(writeCallback);
-    msc.onStartStop(startStopCallback);
-
-    msc.mediaPresent(true);
-
     if (!msc.begin(blockCount, blockSize))
     {
         Serial.println("MassStorageESP32: MSC begin failed");
@@ -177,11 +246,7 @@ bool FatFSUSBClass::begin()
         return false;
     }
 
-    if (!usbStarted)
-    {
-        USB.begin();
-        usbStarted = true;
-    }
+    msc.mediaPresent(true);
 
     mediaStarted = true;
     ejected = false;
@@ -213,7 +278,6 @@ void FatFSUSBClass::end()
     sectorBuffer = nullptr;
 
     mediaStarted = false;
-    ejected = false;
     blockCount = 0;
     blockSize = 0;
     mediaSize = 0;
@@ -236,7 +300,50 @@ void FatFSUSBClass::unplug()
 
 bool FatFSUSBClass::isConnected()
 {
-    return mediaStarted && !ejected;
+    return mediaStarted && hostConnected && !ejected;
+}
+
+bool FatFSUSBClass::isHostConnected()
+{
+    return hostConnected;
+}
+
+bool FatFSUSBClass::isEjected()
+{
+    return ejected;
+}
+
+void FatFSUSBClass::usbEventCallback(
+    void *arg,
+    esp_event_base_t event_base,
+    int32_t event_id,
+    void *event_data)
+{
+    (void)arg;
+    (void)event_data;
+
+    if (event_base != ARDUINO_USB_EVENTS)
+    {
+        return;
+    }
+
+    switch (event_id)
+    {
+    case ARDUINO_USB_STARTED_EVENT:
+        hostConnected = true;
+        ejected = false;
+        Serial.println("MassStorageESP32: USB host connected");
+        break;
+
+    case ARDUINO_USB_STOPPED_EVENT:
+        hostConnected = false;
+        ejected = false;
+        Serial.println("MassStorageESP32: USB host disconnected");
+        break;
+
+    default:
+        break;
+    }
 }
 
 int32_t FatFSUSBClass::readCallback(
@@ -357,7 +464,6 @@ bool FatFSUSBClass::startStopCallback(
     if (load_eject && !start)
     {
         ejected = true;
-        mediaStarted = false;
     }
 
     return true;

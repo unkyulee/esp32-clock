@@ -55,6 +55,9 @@ void app_setup()
     // Buzzer Setup
     buzzer_setup();
 
+    // USB Mass Storage waits for a host and exposes FAT only while connected
+    ms_setup();
+
     // app ready
     _ready = true;
     _log("App is ready\n");

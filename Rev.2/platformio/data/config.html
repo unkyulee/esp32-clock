@@ -1,4 +1,3 @@
-<!-- Simple WiFi Config Page -->
 <!DOCTYPE html>
 <html lang="en">
 
@@ -10,408 +9,1292 @@
     content="width=device-width, initial-scale=1.0"
   >
   <style>
-    body {
-      background: #181c20;
-      color: #fff;
-      font-family: 'Segoe UI', Arial, sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      min-height: 100vh;
-      margin: 0;
-      padding: 1rem 0;
+    :root {
+      --bg: #f3f5f7;
+      --surface: #ffffff;
+      --surface-muted: #eef1f5;
+      --line: #d8dde6;
+      --text: #151922;
+      --muted: #5d6878;
+      --menu: #172033;
+      --menu-muted: #b9c3d6;
+      --blue: #2563eb;
+      --blue-dark: #1d4ed8;
+      --green: #0f8a65;
+      --red: #b42318;
+      --amber: #b45309;
+      --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+    }
+
+    * {
       box-sizing: border-box;
     }
 
-    .container {
-      background: #23272b;
-      padding: 1.6rem 1.8rem;
-      border-radius: 12px;
-      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
-      min-width: 340px;
-      max-width: 540px;
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Segoe UI", Arial, sans-serif;
+      margin: 0;
+      min-height: 100vh;
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    .shell {
+      display: grid;
+      grid-template-columns: 220px minmax(0, 1fr);
+      min-height: 100vh;
+    }
+
+    .menu {
+      background: var(--menu);
+      color: #fff;
+      padding: 1.25rem 1rem;
+    }
+
+    .brand {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+      margin-bottom: 1rem;
+      padding: 0.35rem 0.45rem 1rem;
+    }
+
+    .brand strong {
+      display: block;
+      font-size: 1.15rem;
+      line-height: 1.2;
+    }
+
+    .brand span {
+      color: var(--menu-muted);
+      display: block;
+      font-size: 0.82rem;
+      margin-top: 0.25rem;
+    }
+
+    .nav {
+      display: grid;
+      gap: 0.35rem;
+    }
+
+    .nav button {
+      align-items: center;
+      background: transparent;
+      border: 0;
+      border-radius: 8px;
+      color: var(--menu-muted);
+      cursor: pointer;
+      display: flex;
+      gap: 0.55rem;
+      min-height: 2.7rem;
+      padding: 0 0.75rem;
+      text-align: left;
       width: 100%;
-      box-sizing: border-box;
+    }
+
+    .nav button:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+    }
+
+    .nav button.active {
+      background: #fff;
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    .nav-mark {
+      background: currentColor;
+      border-radius: 99px;
+      display: inline-block;
+      height: 0.5rem;
+      opacity: 0.75;
+      width: 0.5rem;
+    }
+
+    .content {
+      margin: 0 auto;
+      max-width: 980px;
+      padding: 1.5rem;
+      width: 100%;
+    }
+
+    .view {
+      display: none;
+    }
+
+    .view.active {
+      display: block;
+    }
+
+    .page-heading {
+      align-items: flex-start;
+      display: flex;
+      gap: 1rem;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+
+    .eyebrow {
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      margin: 0 0 0.3rem;
+      text-transform: uppercase;
     }
 
     h1 {
-      margin: 0 0 0.3rem;
-      font-size: 1.4rem;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-      text-align: left;
+      font-size: 1.75rem;
+      line-height: 1.15;
+      margin: 0;
     }
 
-    p {
-      margin: 0 0 1.2rem;
-      color: #cfd7e3;
-      font-size: 0.95rem;
+    h2 {
+      font-size: 1rem;
+      margin: 0;
+    }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      padding: 1rem;
+    }
+
+    .status-grid {
+      display: grid;
+      gap: 0.85rem;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      margin-bottom: 1rem;
+    }
+
+    .panel-title {
+      color: var(--muted);
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      margin-bottom: 0.65rem;
+      text-transform: uppercase;
+    }
+
+    .state-row {
+      align-items: center;
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 0.8rem;
+      min-height: 1.7rem;
+    }
+
+    .status-dot {
+      background: var(--amber);
+      border-radius: 99px;
+      display: inline-block;
+      height: 0.7rem;
+      width: 0.7rem;
+    }
+
+    .status-dot.connected {
+      background: var(--green);
+    }
+
+    .status-dot.disconnected {
+      background: var(--red);
+    }
+
+    .status-dot.checking {
+      background: var(--amber);
+    }
+
+    dl {
+      display: grid;
+      gap: 0.45rem;
+      margin: 0;
+    }
+
+    .kv {
+      display: grid;
+      gap: 0.35rem;
+      grid-template-columns: 6.5rem minmax(0, 1fr);
+    }
+
+    dt {
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    dd {
+      margin: 0;
+      min-width: 0;
+      overflow-wrap: anywhere;
+    }
+
+    .quick-actions,
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.65rem;
+      margin-top: 1rem;
+    }
+
+    button.primary,
+    button.secondary,
+    button.ghost {
+      border: 0;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 700;
+      min-height: 2.65rem;
+      padding: 0 1rem;
+    }
+
+    button.primary {
+      background: var(--blue);
+      color: #fff;
+    }
+
+    button.primary:hover {
+      background: var(--blue-dark);
+    }
+
+    button.secondary {
+      background: var(--surface-muted);
+      color: var(--text);
+    }
+
+    button.secondary:hover {
+      background: #e1e6ee;
+    }
+
+    button.ghost {
+      background: transparent;
+      border: 1px solid var(--line);
+      color: var(--text);
+    }
+
+    button.ghost:hover {
+      background: var(--surface-muted);
+    }
+
+    .form-grid {
+      display: grid;
+      gap: 0.9rem;
     }
 
     label {
+      color: var(--text);
       display: block;
-      margin-bottom: 0.5rem;
-      font-size: 1rem;
-      font-weight: 500;
+      font-size: 0.92rem;
+      font-weight: 700;
+      margin-bottom: 0.4rem;
     }
 
     input[type="text"],
     input[type="password"],
     select {
+      background: #fff;
+      border: 1px solid #c9d0dc;
+      border-radius: 8px;
+      color: var(--text);
+      min-height: 2.75rem;
+      padding: 0 0.75rem;
       width: 100%;
-      padding: 0.7rem;
-      margin-bottom: 1.2rem;
-      border: none;
-      border-radius: 6px;
-      background: #2c3136;
-      color: #fff;
-      font-size: 1rem;
-      box-sizing: border-box;
     }
 
-    input[type="text"]:focus,
-    input[type="password"]:focus,
+    input[type="file"] {
+      background: var(--surface-muted);
+      border: 1px dashed #aeb8c8;
+      border-radius: 8px;
+      padding: 0.75rem;
+      width: 100%;
+    }
+
+    input:focus,
     select:focus {
-      outline: 2px solid #4e9cff;
+      border-color: var(--blue);
+      outline: 3px solid rgba(37, 99, 235, 0.18);
     }
 
-    .actions {
-      display: flex;
-      gap: 0.75rem;
-      margin-top: 1.4rem;
+    .hint,
+    .inline-status {
+      color: var(--muted);
+      font-size: 0.88rem;
+      margin: 0.4rem 0 0;
     }
 
-    button,
-    .secondary {
-      padding: 0.8rem;
-      border: none;
-      border-radius: 6px;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-
-    button {
-      background: #4e9cff;
-      color: #fff;
-      width: 100%;
-    }
-
-    button:hover {
-      background: #3578e5;
-    }
-
-    .secondary {
-      background: #2c3136;
-      color: #fff;
-      width: auto;
-      padding: 0.65rem 1rem;
-    }
-
-    .section {
-      background: #1e2227;
-      border-radius: 10px;
-      padding: 1rem 1.1rem;
-      margin-bottom: 1rem;
-      border: 1px solid #2f353c;
+    .inline-status.error {
+      color: var(--red);
+      font-weight: 700;
     }
 
     .section-header {
-      display: flex;
       align-items: center;
-      justify-content: space-between;
+      display: flex;
       gap: 0.75rem;
+      justify-content: space-between;
       margin-bottom: 0.75rem;
     }
 
-    .status {
-      font-size: 0.9rem;
-      color: #cfd7e3;
-      margin-bottom: 0.5rem;
+    .stepper {
+      display: grid;
+      gap: 0.5rem;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      margin-bottom: 1rem;
+    }
+
+    .step {
+      align-items: center;
+      background: var(--surface-muted);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      color: var(--muted);
+      display: flex;
+      gap: 0.55rem;
+      min-height: 3rem;
+      padding: 0.55rem 0.7rem;
+    }
+
+    .step-index {
+      align-items: center;
+      background: #dfe5ee;
+      border-radius: 99px;
+      display: inline-flex;
+      flex: 0 0 auto;
+      font-size: 0.82rem;
+      font-weight: 800;
+      height: 1.55rem;
+      justify-content: center;
+      width: 1.55rem;
+    }
+
+    .step.active {
+      background: #e8f0ff;
+      border-color: #aac2f8;
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    .step.active .step-index {
+      background: var(--blue);
+      color: #fff;
+    }
+
+    .step.done {
+      color: var(--green);
+    }
+
+    .wizard-stage {
+      display: none;
+    }
+
+    .wizard-stage.active {
+      display: block;
     }
 
     .network-list {
-      display: flex;
-      flex-direction: column;
-      gap: 0.6rem;
-      max-height: 220px;
+      display: grid;
+      gap: 0.55rem;
+      margin: 0.75rem 0 1rem;
+      max-height: 18rem;
       overflow-y: auto;
+      padding-right: 0.2rem;
     }
 
     .network {
-      display: flex;
       align-items: center;
-      gap: 0.65rem;
-      padding: 0.6rem 0.7rem;
-      background: #262b31;
+      background: #fff;
+      border: 1px solid var(--line);
       border-radius: 8px;
-      border: 1px solid #323841;
+      color: var(--text);
       cursor: pointer;
+      display: grid;
+      gap: 0.3rem;
+      grid-template-columns: minmax(0, 1fr) auto;
+      min-height: 3.4rem;
+      padding: 0.7rem 0.8rem;
+      text-align: left;
+      width: 100%;
     }
 
     .network:hover {
-      border-color: #4e9cff;
+      border-color: var(--blue);
+    }
+
+    .network.selected {
+      background: #eef5ff;
+      border-color: var(--blue);
     }
 
     .network strong {
       display: block;
-      color: #fff;
-      font-size: 1rem;
+      overflow-wrap: anywhere;
     }
 
     .meta {
-      color: #b6c2d2;
-      font-size: 0.85rem;
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+
+    .badge {
+      border-radius: 99px;
+      background: var(--surface-muted);
+      color: var(--muted);
+      display: inline-block;
+      font-size: 0.78rem;
+      font-weight: 800;
+      padding: 0.25rem 0.5rem;
+      white-space: nowrap;
+    }
+
+    .review {
+      background: var(--surface-muted);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      margin-top: 0.8rem;
+      padding: 0.85rem;
+    }
+
+    .checkbox-row {
+      align-items: center;
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.6rem;
+    }
+
+    .checkbox-row label {
+      color: var(--muted);
+      font-weight: 600;
+      margin: 0;
+    }
+
+    .advanced-grid {
+      display: grid;
+      gap: 0.85rem;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    }
+
+    @media (max-width: 720px) {
+      .shell {
+        display: block;
+      }
+
+      .menu {
+        padding: 0.85rem;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+      }
+
+      .brand {
+        margin-bottom: 0.75rem;
+        padding-bottom: 0.75rem;
+      }
+
+      .nav {
+        display: flex;
+        gap: 0.45rem;
+        overflow-x: auto;
+        padding-bottom: 0.15rem;
+      }
+
+      .nav button {
+        flex: 0 0 auto;
+        min-height: 2.45rem;
+        width: auto;
+      }
+
+      .content {
+        padding: 1rem;
+      }
+
+      .page-heading {
+        display: grid;
+      }
+
+      .stepper {
+        grid-template-columns: 1fr;
+      }
+
+      .kv {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
 
 <body>
-  <div class="container">
-    <form
-      method="POST"
-      action="/save"
-    >
-    <h1>WiFi Setup</h1>
-    <p>Select a network from the list or enter credentials manually.</p>
-
-    <div class="section">
-      <div class="section-header">
-        <div>
-          <strong>Nearby Networks</strong>
-        </div>
+  <div class="shell">
+    <aside class="menu">
+      <div class="brand">
+        <strong>The Clock</strong>
+        <span>Configuration</span>
+      </div>
+      <nav
+        class="nav"
+        aria-label="Configuration menu"
+      >
         <button
           type="button"
-          class="secondary"
-          id="scan-btn"
+          class="active"
+          data-view="status"
         >
-          Scan
+          <span class="nav-mark"></span>
+          Status
         </button>
-      </div>
-      <div
-        id="scan-status"
-        class="status"
-      >
-        Scanning...
-      </div>
-      <div
-        id="networks"
-        class="network-list"
-      ></div>
-    </div>
+        <button
+          type="button"
+          data-view="wifi"
+        >
+          <span class="nav-mark"></span>
+          WiFi Configuration
+        </button>
+        <button
+          type="button"
+          data-view="time"
+        >
+          <span class="nav-mark"></span>
+          Time Settings
+        </button>
+        <button
+          type="button"
+          data-view="advanced"
+        >
+          <span class="nav-mark"></span>
+          Advanced
+        </button>
+      </nav>
+    </aside>
 
-    <label for="ssid">WiFi SSID</label>
-    <input
-      type="text"
-      id="ssid"
-      name="ssid"
-      value="#ssid#"
-      required
-    >
-
-    <label for="password">WiFi Password</label>
-    <input
-      type="password"
-      id="password"
-      name="password"
-      value="#password#"
-      required
-    >
-
-    <label for="tzServer">NTP Server</label>
-    <input
-      type="text"
-      id="tzServer"
-      name="tzServer"
-      value="pool.ntp.org"
-      required
-    >
-
-    <label for="tz">Time Zone</label>
-    <select
-      id="tz"
-      name="tz"
-      required
-    >
-      <option value="">Select your time zone</option>
-      <option value="UTC0">UTC (no DST)</option>
-      <option value="GMT0BST,M3.5.0/1,M10.5.0/2">United Kingdom</option>
-      <option value="CET-1CEST,M3.5.0/2,M10.5.0/3">Central Europe (Italy, Germany, France)</option>
-      <option value="EET-2EEST,M3.5.0/3,M10.5.0/4">Eastern Europe (Greece, Romania)</option>
-      <option value="MSK-3">Moscow</option>
-      <option value="IST-5:30">India</option>
-      <option value="CST-8">China</option>
-      <option value="JST-9">Japan</option>
-      <option value="KST-9">Korea (Seoul)</option>
-      <option value="AEST-10AEDT,M10.1.0,M4.1.0/3">Australia (Sydney)</option>
-      <option value="EST5EDT,M3.2.0,M11.1.0">US Eastern</option>
-      <option value="CST6CDT,M3.2.0,M11.1.0">US Central</option>
-      <option value="MST7MDT,M3.2.0,M11.1.0">US Mountain</option>
-      <option value="PST8PDT,M3.2.0,M11.1.0">US Pacific</option>
-    </select>
-
-    <div class="actions">
-      <button type="submit">Save</button>
-    </div>
-    </form>
-
-    <button
-      type="button"
-      class="secondary"
-      id="advanced-toggle"
-      style="margin: 1rem 0 0.5rem;"
-    >
-      Advanced Mode
-    </button>
-
-    <div
-      class="section"
-      id="advanced-section"
-      style="margin-top: 0; display: none;"
-    >
-      <div class="section-header">
-        <div>
-          <strong>Firmware Update</strong>
-        </div>
-      </div>
+    <main class="content">
       <form
         method="POST"
-        action="/update"
-        enctype="multipart/form-data"
+        action="/save"
+        id="settings-form"
       >
-        <input
-          type="file"
-          name="firmware"
-          accept=".bin"
+        <section
+          class="view active"
+          id="view-status"
         >
-        <button type="submit">Upload & Install</button>
+          <div class="page-heading">
+            <div>
+              <p class="eyebrow">Status</p>
+              <h1>Clock status</h1>
+            </div>
+            <button
+              type="button"
+              class="secondary"
+              id="status-refresh"
+            >
+              Refresh
+            </button>
+          </div>
+
+          <div class="status-grid">
+            <article class="panel">
+              <div class="panel-title">WiFi connection</div>
+              <div class="state-row">
+                <span
+                  class="status-dot checking"
+                  id="wifi-dot"
+                ></span>
+                <strong id="wifi-state">Checking</strong>
+              </div>
+              <dl>
+                <div class="kv">
+                  <dt>Network</dt>
+                  <dd id="status-ssid">#ssid#</dd>
+                </div>
+                <div class="kv">
+                  <dt>IP address</dt>
+                  <dd id="status-ip">--</dd>
+                </div>
+                <div class="kv">
+                  <dt>Mode</dt>
+                  <dd id="status-mode">--</dd>
+                </div>
+                <div class="kv">
+                  <dt>Signal</dt>
+                  <dd id="status-rssi">--</dd>
+                </div>
+              </dl>
+            </article>
+
+            <article class="panel">
+              <div class="panel-title">Clock time</div>
+              <dl>
+                <div class="kv">
+                  <dt>Time zone</dt>
+                  <dd id="status-tz-label">--</dd>
+                </div>
+                <div class="kv">
+                  <dt>POSIX TZ</dt>
+                  <dd id="status-tz-value">#tz#</dd>
+                </div>
+                <div class="kv">
+                  <dt>NTP server</dt>
+                  <dd id="status-ntp">#tzServer#</dd>
+                </div>
+              </dl>
+            </article>
+
+            <article class="panel">
+              <div class="panel-title">Setup access point</div>
+              <dl>
+                <div class="kv">
+                  <dt>AP name</dt>
+                  <dd id="status-ap-ssid">--</dd>
+                </div>
+                <div class="kv">
+                  <dt>AP address</dt>
+                  <dd id="status-ap-ip">--</dd>
+                </div>
+              </dl>
+            </article>
+          </div>
+
+          <div class="quick-actions">
+            <button
+              type="button"
+              class="primary"
+              data-go="wifi"
+            >
+              WiFi Configuration
+            </button>
+            <button
+              type="button"
+              class="secondary"
+              data-go="time"
+            >
+              Time Settings
+            </button>
+          </div>
+        </section>
+
+        <section
+          class="view"
+          id="view-wifi"
+        >
+          <div class="page-heading">
+            <div>
+              <p class="eyebrow">WiFi</p>
+              <h1>WiFi configuration</h1>
+            </div>
+          </div>
+
+          <div
+            class="stepper"
+            aria-label="WiFi setup steps"
+          >
+            <div
+              class="step active"
+              data-step-label="1"
+            >
+              <span class="step-index">1</span>
+              Access point
+            </div>
+            <div
+              class="step"
+              data-step-label="2"
+            >
+              <span class="step-index">2</span>
+              Password
+            </div>
+            <div
+              class="step"
+              data-step-label="3"
+            >
+              <span class="step-index">3</span>
+              Save
+            </div>
+          </div>
+
+          <div
+            class="wizard-stage active"
+            data-wizard-step="1"
+          >
+            <div class="panel">
+              <div class="section-header">
+                <h2>Choose access point</h2>
+                <button
+                  type="button"
+                  class="secondary"
+                  id="scan-btn"
+                >
+                  Scan
+                </button>
+              </div>
+              <div
+                id="scan-status"
+                class="inline-status"
+              >
+                Ready
+              </div>
+              <div
+                id="networks"
+                class="network-list"
+              ></div>
+
+              <label for="ssid">Manual SSID</label>
+              <input
+                type="text"
+                id="ssid"
+                name="ssid"
+                value="#ssid#"
+                autocomplete="username"
+              >
+            </div>
+            <div class="actions">
+              <button
+                type="button"
+                class="ghost"
+                data-go="status"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                class="primary"
+                id="wifi-to-password"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+
+          <div
+            class="wizard-stage"
+            data-wizard-step="2"
+          >
+            <div class="panel">
+              <div class="panel-title">Selected access point</div>
+              <div class="state-row">
+                <strong id="selected-ssid">--</strong>
+                <span
+                  class="badge"
+                  id="selected-security"
+                >Security unknown</span>
+              </div>
+
+              <label for="password">WiFi Password</label>
+              <input
+                type="password"
+                id="password"
+                name="password"
+                value="#password#"
+                autocomplete="current-password"
+              >
+              <p
+                class="inline-status"
+                id="password-status"
+              ></p>
+              <div class="checkbox-row">
+                <input
+                  type="checkbox"
+                  id="show-password"
+                >
+                <label for="show-password">Show password</label>
+              </div>
+            </div>
+            <div class="actions">
+              <button
+                type="button"
+                class="secondary"
+                id="wifi-back-ap"
+              >
+                Back
+              </button>
+              <button
+                type="button"
+                class="primary"
+                id="wifi-to-review"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+
+          <div
+            class="wizard-stage"
+            data-wizard-step="3"
+          >
+            <div class="panel">
+              <h2>Review WiFi settings</h2>
+              <div class="review">
+                <dl>
+                  <div class="kv">
+                    <dt>Network</dt>
+                    <dd id="review-ssid">--</dd>
+                  </div>
+                  <div class="kv">
+                    <dt>Password</dt>
+                    <dd id="review-password">--</dd>
+                  </div>
+                  <div class="kv">
+                    <dt>Time zone</dt>
+                    <dd id="review-tz">--</dd>
+                  </div>
+                </dl>
+              </div>
+            </div>
+            <div class="actions">
+              <button
+                type="button"
+                class="secondary"
+                id="wifi-back-password"
+              >
+                Back
+              </button>
+              <button
+                type="submit"
+                class="primary"
+              >
+                Save and Restart
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <section
+          class="view"
+          id="view-time"
+        >
+          <div class="page-heading">
+            <div>
+              <p class="eyebrow">Time</p>
+              <h1>Time settings</h1>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="form-grid">
+              <div>
+                <label for="tzServer">NTP Server</label>
+                <input
+                  type="text"
+                  id="tzServer"
+                  name="tzServer"
+                  value="#tzServer#"
+                  autocomplete="off"
+                >
+              </div>
+
+              <div>
+                <label for="tz">Time Zone</label>
+                <select
+                  id="tz"
+                  name="tz"
+                >
+                  <option value="">Select your time zone</option>
+                  <option value="UTC0">UTC (no DST)</option>
+                  <option value="GMT0BST,M3.5.0/1,M10.5.0/2">United Kingdom</option>
+                  <option value="CET-1CEST,M3.5.0/2,M10.5.0/3">Central Europe (Italy, Germany, France)</option>
+                  <option value="EET-2EEST,M3.5.0/3,M10.5.0/4">Eastern Europe (Greece, Romania)</option>
+                  <option value="MSK-3">Moscow</option>
+                  <option value="IST-5:30">India</option>
+                  <option value="CST-8">China</option>
+                  <option value="JST-9">Japan</option>
+                  <option value="KST-9">Korea (Seoul)</option>
+                  <option value="AEST-10AEDT,M10.1.0,M4.1.0/3">Australia (Sydney)</option>
+                  <option value="EST5EDT,M3.2.0,M11.1.0">US Eastern</option>
+                  <option value="CST6CDT,M3.2.0,M11.1.0">US Central</option>
+                  <option value="MST7MDT,M3.2.0,M11.1.0">US Mountain</option>
+                  <option value="PST8PDT,M3.2.0,M11.1.0">US Pacific</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button
+              type="submit"
+              class="primary"
+            >
+              Save and Restart
+            </button>
+          </div>
+        </section>
       </form>
-      <div style="height: 12px;"></div>
-      <div class="section-header">
-        <div>
-          <strong>Upload config.html</strong>
+
+      <section
+        class="view"
+        id="view-advanced"
+      >
+        <div class="page-heading">
+          <div>
+            <p class="eyebrow">Advanced</p>
+            <h1>Advanced tools</h1>
+          </div>
         </div>
-      </div>
-      <form
-        method="POST"
-        action="/update-config"
-        enctype="multipart/form-data"
-      >
-        <input
-          type="file"
-          name="config"
-          accept=".html"
-        >
-        <button type="submit">Upload Config Page</button>
-      </form>
-    </div>
+
+        <div class="advanced-grid">
+          <div class="panel">
+            <div class="panel-title">Firmware update</div>
+            <form
+              method="POST"
+              action="/update"
+              enctype="multipart/form-data"
+            >
+              <div class="form-grid">
+                <input
+                  type="file"
+                  name="firmware"
+                  accept=".bin"
+                >
+                <button
+                  type="submit"
+                  class="primary"
+                >
+                  Upload and Install
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <div class="panel">
+            <div class="panel-title">Config page upload</div>
+            <form
+              method="POST"
+              action="/update-config"
+              enctype="multipart/form-data"
+            >
+              <div class="form-grid">
+                <input
+                  type="file"
+                  name="config"
+                  accept=".html"
+                >
+                <button
+                  type="submit"
+                  class="primary"
+                >
+                  Upload Config Page
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>
+    </main>
   </div>
+
   <script>
     (function () {
+      var navButtons = document.querySelectorAll('.nav button[data-view]');
+      var goButtons = document.querySelectorAll('[data-go]');
+      var views = document.querySelectorAll('.view');
+      var statusRefresh = document.getElementById('status-refresh');
+      var wifiDot = document.getElementById('wifi-dot');
+      var wifiState = document.getElementById('wifi-state');
+      var statusSsid = document.getElementById('status-ssid');
+      var statusIp = document.getElementById('status-ip');
+      var statusMode = document.getElementById('status-mode');
+      var statusRssi = document.getElementById('status-rssi');
+      var statusApSsid = document.getElementById('status-ap-ssid');
+      var statusApIp = document.getElementById('status-ap-ip');
+      var statusTzLabel = document.getElementById('status-tz-label');
+      var statusTzValue = document.getElementById('status-tz-value');
+      var statusNtp = document.getElementById('status-ntp');
       var tzSelect = document.getElementById('tz');
-      var currentTz = '#tz#';
-      if (!tzSelect || !currentTz) return;
-      var exists = Array.prototype.some.call(tzSelect.options, function (opt) {
-        return opt.value === currentTz;
-      });
-      if (!exists) {
-        var custom = document.createElement('option');
-        custom.value = currentTz;
-        custom.textContent = currentTz;
-        tzSelect.insertBefore(custom, tzSelect.firstChild);
-      }
-      tzSelect.value = currentTz;
-    })();
-
-    (function () {
+      var tzServerInput = document.getElementById('tzServer');
       var networksEl = document.getElementById('networks');
-      var statusEl = document.getElementById('scan-status');
+      var scanStatus = document.getElementById('scan-status');
       var scanBtn = document.getElementById('scan-btn');
-      var rescanBtn = null;
       var ssidInput = document.getElementById('ssid');
       var passwordInput = document.getElementById('password');
-      var advancedToggle = document.getElementById('advanced-toggle');
-      var advancedSection = document.getElementById('advanced-section');
+      var passwordStatus = document.getElementById('password-status');
+      var selectedSsid = document.getElementById('selected-ssid');
+      var selectedSecurity = document.getElementById('selected-security');
+      var reviewSsid = document.getElementById('review-ssid');
+      var reviewPassword = document.getElementById('review-password');
+      var reviewTz = document.getElementById('review-tz');
+      var showPassword = document.getElementById('show-password');
+      var scanStarted = false;
+      var selectedNetworkSecure = null;
 
-      function setStatus(message) {
-        statusEl.textContent = message;
+      function showView(viewName) {
+        Array.prototype.forEach.call(views, function (view) {
+          view.classList.toggle('active', view.id === 'view-' + viewName);
+        });
+
+        Array.prototype.forEach.call(navButtons, function (button) {
+          button.classList.toggle('active', button.getAttribute('data-view') === viewName);
+        });
+
+        if (viewName === 'status') {
+          refreshStatus();
+        }
+
+        if (viewName === 'wifi') {
+          showWifiStep(1);
+          if (!scanStarted) scan();
+        }
+      }
+
+      Array.prototype.forEach.call(navButtons, function (button) {
+        button.addEventListener('click', function () {
+          showView(button.getAttribute('data-view'));
+        });
+      });
+
+      Array.prototype.forEach.call(goButtons, function (button) {
+        button.addEventListener('click', function () {
+          showView(button.getAttribute('data-go'));
+        });
+      });
+
+      function timezoneLabel(value) {
+        if (!value) return 'Not set';
+        for (var i = 0; i < tzSelect.options.length; i++) {
+          if (tzSelect.options[i].value === value) return tzSelect.options[i].textContent;
+        }
+        return value;
+      }
+
+      function ensureTimezoneOption(value) {
+        if (!value) return;
+        for (var i = 0; i < tzSelect.options.length; i++) {
+          if (tzSelect.options[i].value === value) return;
+        }
+        var custom = document.createElement('option');
+        custom.value = value;
+        custom.textContent = value;
+        tzSelect.insertBefore(custom, tzSelect.firstChild);
+      }
+
+      function updateTimeStatus(tzValue, ntpValue) {
+        var zone = tzValue || tzSelect.value;
+        var server = ntpValue || tzServerInput.value || 'pool.ntp.org';
+        ensureTimezoneOption(zone);
+        if (zone) tzSelect.value = zone;
+        statusTzLabel.textContent = timezoneLabel(zone);
+        statusTzValue.textContent = zone || 'Not set';
+        statusNtp.textContent = server;
+        reviewTz.textContent = timezoneLabel(zone);
+      }
+
+      function setWifiState(state, className) {
+        wifiState.textContent = state;
+        wifiDot.className = 'status-dot ' + className;
+      }
+
+      function fallbackStatus() {
+        var configured = !!ssidInput.value;
+        setWifiState(configured ? 'Configured' : 'Not configured', configured ? 'checking' : 'disconnected');
+        statusSsid.textContent = configured ? ssidInput.value : 'Not configured';
+        statusIp.textContent = '--';
+        statusMode.textContent = configured ? 'Station' : 'Setup';
+        statusRssi.textContent = '--';
+        statusApSsid.textContent = '--';
+        statusApIp.textContent = '--';
+        updateTimeStatus(tzSelect.value, tzServerInput.value);
+      }
+
+      function applyStatus(data) {
+        var wifi = data && data.wifi ? data.wifi : {};
+        var ap = data && data.ap ? data.ap : {};
+        var time = data && data.time ? data.time : {};
+        var configured = !!wifi.configured || !!ssidInput.value;
+        var connected = !!wifi.connected;
+
+        if (connected) {
+          setWifiState('Connected', 'connected');
+        } else if (configured) {
+          setWifiState('Not connected', 'disconnected');
+        } else {
+          setWifiState('Not configured', 'disconnected');
+        }
+
+        statusSsid.textContent = wifi.ssid || ssidInput.value || 'Not configured';
+        statusIp.textContent = wifi.ip || '--';
+        statusMode.textContent = wifi.mode || '--';
+        statusRssi.textContent = typeof wifi.rssi === 'number' ? wifi.rssi + ' dBm' : '--';
+        statusApSsid.textContent = ap.ssid || '--';
+        statusApIp.textContent = ap.ip && ap.ip !== '0.0.0.0' ? ap.ip : '--';
+        updateTimeStatus(time.tz || tzSelect.value, time.tzServer || tzServerInput.value);
+      }
+
+      function refreshStatus() {
+        setWifiState('Checking', 'checking');
+        fetch('/status', { cache: 'no-store' })
+          .then(function (res) {
+            if (!res.ok) throw new Error('Status failed');
+            return res.json();
+          })
+          .then(applyStatus)
+          .catch(fallbackStatus);
+      }
+
+      function setScanStatus(message, isError) {
+        scanStatus.textContent = message;
+        scanStatus.classList.toggle('error', !!isError);
+      }
+
+      function networkMeta(net) {
+        var parts = [];
+        parts.push(net.secure ? 'Secured' : 'Open');
+        if (typeof net.rssi === 'number') parts.push(net.rssi + ' dBm');
+        if (net.channel) parts.push('Channel ' + net.channel);
+        return parts.join(' | ');
+      }
+
+      function updateSelectedNetwork() {
+        var ssid = ssidInput.value;
+        selectedSsid.textContent = ssid || '--';
+        reviewSsid.textContent = ssid || '--';
+        if (selectedNetworkSecure === true) {
+          selectedSecurity.textContent = 'Secured';
+        } else if (selectedNetworkSecure === false) {
+          selectedSecurity.textContent = 'Open';
+        } else {
+          selectedSecurity.textContent = 'Security unknown';
+        }
+        reviewPassword.textContent = passwordInput.value ? 'Saved password entered' : 'No password';
+      }
+
+      function selectNetwork(net) {
+        selectedNetworkSecure = !!net.secure;
+        ssidInput.value = net.ssid;
+        updateSelectedNetwork();
+        Array.prototype.forEach.call(networksEl.querySelectorAll('.network'), function (button) {
+          button.classList.toggle('selected', button.getAttribute('data-ssid') === net.ssid);
+        });
       }
 
       function renderNetworks(list) {
         networksEl.innerHTML = '';
 
         if (!list || !list.length) {
-          setStatus('No networks found. You can still enter SSID manually.');
+          setScanStatus('No networks found. Enter the SSID manually.', false);
           return;
         }
 
         list.forEach(function (net) {
           if (!net.ssid) return;
 
-          var label = document.createElement('label');
-          label.className = 'network';
-
-          var radio = document.createElement('input');
-          radio.type = 'radio';
-          radio.name = 'network';
-          radio.value = net.ssid;
-          radio.checked = ssidInput.value === net.ssid;
-          radio.addEventListener('change', function () {
-            ssidInput.value = net.ssid;
-            passwordInput.focus();
+          var button = document.createElement('button');
+          button.type = 'button';
+          button.className = 'network';
+          button.setAttribute('data-ssid', net.ssid);
+          if (ssidInput.value === net.ssid) {
+            button.classList.add('selected');
+            selectedNetworkSecure = !!net.secure;
+          }
+          button.addEventListener('click', function () {
+            selectNetwork(net);
           });
 
-          var textWrap = document.createElement('div');
-          var ssidSpan = document.createElement('strong');
-          ssidSpan.textContent = net.ssid;
-          var metaSpan = document.createElement('span');
-          metaSpan.className = 'meta';
-                              metaSpan.textContent = (net.secure ? 'Secured' : 'Open') + ' - ' + net.rssi + ' dBm';
+          var textWrap = document.createElement('span');
+          var ssid = document.createElement('strong');
+          var meta = document.createElement('span');
+          var badge = document.createElement('span');
 
-          textWrap.appendChild(ssidSpan);
-          textWrap.appendChild(metaSpan);
+          ssid.textContent = net.ssid;
+          meta.className = 'meta';
+          meta.textContent = networkMeta(net);
+          badge.className = 'badge';
+          badge.textContent = net.secure ? 'Locked' : 'Open';
 
-          label.appendChild(radio);
-          label.appendChild(textWrap);
-          networksEl.appendChild(label);
+          textWrap.appendChild(ssid);
+          textWrap.appendChild(meta);
+          button.appendChild(textWrap);
+          button.appendChild(badge);
+          networksEl.appendChild(button);
         });
 
-        setStatus('Select a network or enter one manually.');
+        updateSelectedNetwork();
+        setScanStatus('Choose an access point or enter the SSID manually.', false);
       }
 
       function scan() {
-        setStatus('Scanning...');
+        scanStarted = true;
+        setScanStatus('Scanning...', false);
         networksEl.innerHTML = '';
-        fetch('/scan')
+        fetch('/scan', { cache: 'no-store' })
           .then(function (res) {
             if (!res.ok) throw new Error('Scan failed');
             return res.json();
           })
           .then(function (data) {
             if (data && data.status === 'scanning') {
-              setStatus('Scanning...');
               setTimeout(scan, 1000);
               return;
             }
             renderNetworks((data && data.networks) || []);
           })
           .catch(function () {
-            setStatus('Scan failed. You can still enter SSID manually.');
+            setScanStatus('Scan failed. Enter the SSID manually.', true);
           });
       }
 
-      scanBtn.addEventListener('click', scan);
-      scan();
-
-      if (advancedToggle && advancedSection) {
-        advancedToggle.addEventListener('click', function () {
-          var isHidden = advancedSection.style.display === 'none';
-          advancedSection.style.display = isHidden ? 'block' : 'none';
-          advancedToggle.textContent = isHidden ? 'Hide Advanced' : 'Advanced Mode';
+      function showWifiStep(step) {
+        Array.prototype.forEach.call(document.querySelectorAll('.wizard-stage'), function (stage) {
+          stage.classList.toggle('active', stage.getAttribute('data-wizard-step') === String(step));
         });
+        Array.prototype.forEach.call(document.querySelectorAll('.step'), function (item) {
+          var index = Number(item.getAttribute('data-step-label'));
+          item.classList.toggle('active', index === step);
+          item.classList.toggle('done', index < step);
+        });
+        passwordStatus.textContent = '';
+        passwordStatus.classList.remove('error');
+        updateSelectedNetwork();
       }
+
+      function requireSsid() {
+        if (ssidInput.value.trim()) return true;
+        setScanStatus('Enter or choose an SSID.', true);
+        ssidInput.focus();
+        return false;
+      }
+
+      function requirePasswordWhenNeeded() {
+        if (selectedNetworkSecure !== true || passwordInput.value.length) return true;
+        passwordStatus.textContent = 'Password is required for the selected secured network.';
+        passwordStatus.classList.add('error');
+        passwordInput.focus();
+        return false;
+      }
+
+      var currentTz = '#tz#';
+      ensureTimezoneOption(currentTz);
+      if (currentTz) tzSelect.value = currentTz;
+      updateTimeStatus(currentTz, tzServerInput.value);
+      updateSelectedNetwork();
+
+      scanBtn.addEventListener('click', scan);
+      statusRefresh.addEventListener('click', refreshStatus);
+      ssidInput.addEventListener('input', function () {
+        selectedNetworkSecure = null;
+        updateSelectedNetwork();
+      });
+      passwordInput.addEventListener('input', updateSelectedNetwork);
+      tzSelect.addEventListener('change', function () {
+        updateTimeStatus(tzSelect.value, tzServerInput.value);
+      });
+      tzServerInput.addEventListener('input', function () {
+        updateTimeStatus(tzSelect.value, tzServerInput.value);
+      });
+      showPassword.addEventListener('change', function () {
+        passwordInput.type = showPassword.checked ? 'text' : 'password';
+      });
+      document.getElementById('wifi-to-password').addEventListener('click', function () {
+        if (requireSsid()) showWifiStep(2);
+      });
+      document.getElementById('wifi-back-ap').addEventListener('click', function () {
+        showWifiStep(1);
+      });
+      document.getElementById('wifi-to-review').addEventListener('click', function () {
+        if (requirePasswordWhenNeeded()) showWifiStep(3);
+      });
+      document.getElementById('wifi-back-password').addEventListener('click', function () {
+        showWifiStep(2);
+      });
+
+      refreshStatus();
     })();
   </script>
 </body>

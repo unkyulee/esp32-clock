@@ -11,6 +11,7 @@ AsyncWebServer server(80);
 void onConfigGet(AsyncWebServerRequest *request);
 void onConfigSave(AsyncWebServerRequest *request);
 void onConfigScan(AsyncWebServerRequest *request);
+void onConfigStatus(AsyncWebServerRequest *request);
 void onFirmwareUpload(AsyncWebServerRequest *request);
 void handleFirmwareUpload(AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final);
 void onHtmlUpload(AsyncWebServerRequest *request);
@@ -25,6 +26,7 @@ void startWebServer()
     //
     server.on("/save", HTTP_POST, onConfigSave);
     server.on("/scan", HTTP_GET, onConfigScan);
+    server.on("/status", HTTP_GET, onConfigStatus);
     server.on("/update", HTTP_POST, onFirmwareUpload, handleFirmwareUpload);
     server.on("/update-config", HTTP_POST, onHtmlUpload, handleHtmlUpload);
 
@@ -84,6 +86,23 @@ void onConfigGet(AsyncWebServerRequest *request)
 static bool _updateFailed = false;
 static bool _htmlUpdateFailed = false;
 static File _htmlUploadFile;
+
+static const char *wifiModeName(wifi_mode_t mode)
+{
+    switch (mode)
+    {
+    case WIFI_MODE_NULL:
+        return "Off";
+    case WIFI_MODE_STA:
+        return "Station";
+    case WIFI_MODE_AP:
+        return "Access Point";
+    case WIFI_MODE_APSTA:
+        return "Access Point + Station";
+    default:
+        return "Unknown";
+    }
+}
 
 //
 void handleFirmwareUpload(AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final)
@@ -174,6 +193,51 @@ void handleHtmlUpload(AsyncWebServerRequest *request, String filename, size_t in
             _log("[HTML] Upload complete\n");
         }
     }
+}
+
+//
+void onConfigStatus(AsyncWebServerRequest *request)
+{
+    _log("onConfigStatus\n");
+
+    JsonDocument &app = status();
+    JsonDocument doc;
+
+    wl_status_t stationStatus = WiFi.status();
+    bool connected = stationStatus == WL_CONNECTED;
+    bool configured = app["config"]["ssid"].is<String>() && app["config"]["ssid"].as<String>().length() > 0;
+
+    String stationSsid = WiFi.SSID();
+    if (!stationSsid.length() && app["config"]["ssid"].is<String>())
+        stationSsid = app["config"]["ssid"].as<String>();
+
+    String stationIp = connected ? WiFi.localIP().toString() : "";
+    if (!stationIp.length() && app["ip"].is<String>())
+        stationIp = app["ip"].as<String>();
+
+    JsonObject wifi = doc["wifi"].to<JsonObject>();
+    wifi["connected"] = connected;
+    wifi["configured"] = configured;
+    wifi["ssid"] = stationSsid;
+    wifi["ip"] = stationIp;
+    wifi["mode"] = wifiModeName(WiFi.getMode());
+    wifi["statusCode"] = static_cast<int>(stationStatus);
+    if (connected)
+        wifi["rssi"] = WiFi.RSSI();
+
+    JsonObject ap = doc["ap"].to<JsonObject>();
+    ap["ssid"] = WiFi.softAPSSID();
+    ap["ip"] = WiFi.softAPIP().toString();
+
+    JsonObject timeConfig = doc["time"].to<JsonObject>();
+    timeConfig["tz"] = app["config"]["tz"].is<String>() ? app["config"]["tz"].as<String>() : "";
+    timeConfig["tzServer"] = app["config"]["tzServer"].is<String>() ? app["config"]["tzServer"].as<String>() : "pool.ntp.org";
+
+    doc["uptimeMs"] = millis();
+
+    String payload;
+    serializeJson(doc, payload);
+    request->send(200, "application/json", payload);
 }
 
 //
