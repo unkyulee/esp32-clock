@@ -2,12 +2,12 @@
 #include "app/app.h"
 
 #include <Arduino.h>
-#include <SPIFFS.h>
 #include <WiFi.h>
 #include <ESPAsyncWebServer.h>
 #include <Update.h>
 
 AsyncWebServer server(80);
+extern const char embeddedConfigHtml[] asm("_binary_data_config_html_start");
 void onConfigGet(AsyncWebServerRequest *request);
 void onConfigSave(AsyncWebServerRequest *request);
 void onConfigScan(AsyncWebServerRequest *request);
@@ -45,15 +45,32 @@ void onConfigGet(AsyncWebServerRequest *request)
     JsonDocument &app = status();
 
     //
+    String configString;
     File configFile = gfs()->open("/config.html", "r");
     if (configFile)
     {
         _log("[onConfigGet] opening file /config.html\n");
 
         // read the file
-        String configString = configFile.readString();
+        configString = configFile.readString();
         configFile.close();
+    }
 
+    // A firmware upload does not populate FAT storage. Keep the portal usable
+    // when the HTML file is missing, empty, or unavailable during USB access.
+    if (configString.isEmpty())
+    {
+        _log("[onConfigGet] using embedded config page\n");
+        configString = embeddedConfigHtml;
+    }
+
+    if (configString.isEmpty())
+    {
+        request->send(503, "text/plain", "Unable to load configuration page");
+        return;
+    }
+
+    {
         //
         if (app["config"]["ssid"].is<String>() == false)
             app["config"]["ssid"] = "";

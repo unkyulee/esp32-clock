@@ -6,11 +6,14 @@
 //
 const int totalMenu = 4;
 int selectedMenu = 0;
+static const unsigned long MENU_IDLE_TIMEOUT_MS = 30000UL;
+static unsigned long lastMenuInputAt = 0;
 
 //
 void Menu_setup(TFT_eSPI *ptft, U8g2_for_TFT_eSPI *pu8f)
 {
     _log("Menu Screen Setup\n");
+    lastMenuInputAt = millis();
 
     // Clear Screen
     ptft->fillScreen(TFT_BLACK);
@@ -19,6 +22,12 @@ void Menu_setup(TFT_eSPI *ptft, U8g2_for_TFT_eSPI *pu8f)
 //
 void Menu_render(TFT_eSPI *ptft, U8g2_for_TFT_eSPI *pu8f)
 {
+    if (millis() - lastMenuInputAt >= MENU_IDLE_TIMEOUT_MS)
+    {
+        status()["screen"] = CLOCKSCREEN;
+        return;
+    }
+
     // Setup the sprite buffer
     TFT_eSprite sprite = display_sprite();
     sprite.createSprite(SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -70,6 +79,7 @@ void Menu_render(TFT_eSPI *ptft, U8g2_for_TFT_eSPI *pu8f)
 //
 void Menu_input(int key)
 {
+    lastMenuInputAt = millis();
     JsonDocument &app = status();
 
     switch (key)

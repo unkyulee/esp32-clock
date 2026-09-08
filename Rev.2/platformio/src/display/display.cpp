@@ -29,15 +29,33 @@ void display_setup()
   // Initialise the TFT screen
   tft.begin();
 
+  setup_t displayConfig;
+  tft.getSetup(displayConfig);
+  _log("TFT_eSPI %s driver=0x%04X MOSI=%d MISO=%d SCLK=%d CS=%d DC=%d RST=%d SPI=%d kHz\n",
+       displayConfig.version.c_str(), displayConfig.tft_driver,
+       displayConfig.pin_tft_mosi, displayConfig.pin_tft_miso,
+       displayConfig.pin_tft_clk, displayConfig.pin_tft_cs,
+       displayConfig.pin_tft_dc, displayConfig.pin_tft_rst,
+       displayConfig.tft_spi_freq * 100);
+  _log("Display memory: PSRAM=%u free PSRAM=%u free heap=%u\n",
+       ESP.getPsramSize(), ESP.getFreePsram(), ESP.getFreeHeap());
+
   // connect u8g2 procedures to TFT_eSPI
   u8f.begin(tft);
 
   //
   tft.setRotation(1);
 
-  // Fill screen with grey so we can see the effect of printing with and without
-  // a background colour defined
+  // Draw directly to the panel before any sprite allocations.
   tft.fillScreen(TFT_BLACK);
+  tft.setTextColor(TFT_WHITE, TFT_BLACK);
+  tft.drawString("Starting clock...", 16, 16, 2);
+  _log("Display startup text sent\n");
+  delay(1000);
+
+  // The default Wi-Fi screen is zero; an absent previous value also reads as
+  // zero and would otherwise skip its first setup call.
+  status()["screen_prev"] = -1;
 }
 
 //
